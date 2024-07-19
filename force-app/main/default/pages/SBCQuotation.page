@@ -1,0 +1,133 @@
+<apex:page applyHtmlTag="false" standardStylesheets="false"  docType="html-5.0" showHeader="false" renderAs="pdf" standardController="Quote" sidebar="false" extensions="ProductController">
+    <html>
+        <head>
+        <style>
+            @page {
+            margin-left: 0.5cm;    
+            margin-right: 0.5cm; 
+            }
+            ol.d {list-style-type: lower-alpha;}
+        </style>
+        
+    </head>
+        
+        <table style="width:100%;border:1px solid black;border-collapse:collapse;">
+            <tr>
+                <th style="border: 1px solid black;border-collapse:collapse;padding-left:10px;">
+                    <div class="header" style="text-align: center;">
+                        <div style="text-decoration: underline;padding:5px;">QUOTATION</div>
+                        <div style="text-align: center;font-size:80%;">STANLEY RETAIL LTD.</div>
+                        <div style="text-align: center;font-size:70%">
+                            No : 16/3,16/4,16/5, Veerasandra Village,Hosur Road, Bangalore - 560100
+                        </div>
+                    </div>
+                    <div class="content" style="margin-top:20px;">
+                        <div style="width:100%">
+                            <div style="width:60%;float:left;text-align:left;">
+                                <div style="text-decoration: underline;font-size:70%;">CUSTOMER DETAILS</div>
+                                <div style="font-size:60%">Client NB Reddy</div>
+                                <div style="font-size:60%">Bengaluru</div>
+                            </div>
+                            <div style="width:34%;float:right;">
+                                <div style="padding-right: 20px;font-size:70%;">
+                                    Quotation Date : &nbsp;&nbsp;&nbsp;Friday, December 9, 2022<br/>
+                                    Sales Rep : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sagar/Manavi<br/>
+                                    Branch : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Stanley LevelNext Anchor Store<br/>
+                                    Contact no :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 9972128544 <br/>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </th>
+            </tr>
+        </table>
+        
+        
+        
+        
+        
+        <table style="width:100%;border:1px solid black;border-collapse:collapse;">
+            <tr >
+                <th  style="border:1px solid black;font-size:12px;text-align:center;padding-top:10px;padding-bottom:10px;">S.No.</th>
+                <th  style="border:1px solid black;font-size:12px;text-align:center;padding-top:10px;padding-bottom:10px;">Brand</th>
+                <th  style="border:1px solid black;font-size:12px;text-align:center;padding-top:10px;padding-bottom:10px;">Product Name</th>
+                <th  style="border:1px solid black;font-size:12px;text-align:center;padding-top:10px;padding-bottom:10px;">Image</th>
+                <th  style="border:1px solid black;font-size:12px;text-align:center;padding-top:10px;padding-bottom:10px;">Dimension</th>
+                <th  style="border:1px solid black;font-size:12px;text-align:center;padding-top:10px;padding-bottom:10px;">Quantity</th>
+                <th  style="border:1px solid black;font-size:12px;text-align:center;padding-top:10px;padding-bottom:10px;">Price Per Unit</th>
+                <th  style="border:1px solid black;font-size:12px;text-align:center;padding-top:10px;padding-bottom:10px;">Total Amount</th>
+                <th  style="border:1px solid black;font-size:12px;text-align:center;padding-top:10px;padding-bottom:10px;">Delivery Time</th>
+            </tr>
+            <apex:variable var="cnt" value="{!0}" />
+            <apex:repeat value="{!quoteLineItems}" var="qt">
+                <apex:variable var="cnt" value="{!cnt+1}"/>
+                <tr>           
+                    <td style="border:1px solid black;word-wrap: break-word;padding:5px;word-wrap: break-all;width:5%;text-align:center;"><apex:OutputText value="{!cnt}"/></td>
+                    <td style="border:1px solid black;word-wrap: break-word;padding:5px;word-wrap: break-all;text-align:center;width:15%">{!qt.product2.Brand__c}</td>
+                    <td style="border:1px solid black;word-wrap: break-word;padding:5px;word-wrap: break-all;text-align:center;width:15%">{!qt.product2.Name}</td>
+                    <td style="border:1px solid black;word-wrap: break-word;word-wrap: break-all;text-align:center;width:20%"><apex:image url="/sfc/servlet.shepherd/version/download/{!qt.Product2.Image__c}" width="100" height="100"/></td>
+                    <td style="border:1px solid black;word-wrap: break-word;word-wrap: break-all;text-align:center;width:20%"><apex:image url="/sfc/servlet.shepherd/version/download/{!qt.Product2.Dimension__c}" width="100" height="100"/></td>
+                    <td style="border:1px solid black;word-wrap: break-word;padding:5px;word-wrap: break-all;text-align:center;width:10%">2</td>
+                    <td style="border:1px solid black;word-wrap: break-word;padding:5px;word-wrap: break-all;text-align:center;width:20%">1609</td>
+                    <td style="border:1px solid black;word-wrap: break-word;padding:5px;word-wrap: break-all;text-align:center;width:5%">1999</td>
+                    <td style="border:1px solid black;word-wrap: break-word;padding:5px;word-wrap: break-all;text-align:center;width:5%">2-3 days</td>
+                </tr>
+            </apex:repeat> 
+            
+         
+            <!-- <tr>           
+                <td style="border:1px solid black;word-wrap: break-word;padding:5px;word-wrap: break-all;width:5%">&nbsp;</td>
+                <td style="border:1px solid black;word-wrap: break-word;padding:5px;word-wrap: break-all;text-align:center;width:15%">&nbsp;</td>
+                <td style="border:1px solid black;word-wrap: break-word;padding:5px;word-wrap: break-all;text-align:center;width:20%">&nbsp;</td>
+                <td style="border:1px solid black;word-wrap: break-word;padding:5px;word-wrap: break-all;text-align:center;width:5%" colspan="4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>SUB TOTAL</b></td>
+                <td style="border:1px solid black;word-wrap: break-word;padding:5px;word-wrap: break-all;text-align:center;width:5%">{!subTotal}</td>
+            </tr>
+            <tr>           
+                <td style="border:1px solid black;word-wrap: break-word;padding:5px;word-wrap: break-all;width:5%" colspan="3">NOTE</td>
+                <td style="border:1px solid black;word-wrap: break-word;padding:5px;word-wrap: break-all;text-align:center;width:5%" colspan="4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>TRANSPORTATION and INSTALLATION</b></td>
+                <td style="border:1px solid black;word-wrap: break-word;padding:5px;word-wrap: break-all;text-align:center;width:5%">{!quotesList.ShippingHandling}</td>
+            </tr>
+            <tr>           
+                <td style="border:1px solid black;word-wrap: break-word;padding:5px; font-size: 15px;" colspan="3"><b>1. ABOVE QUOTE IS INCLUSIVE OF TRANSPORTATION &amp; INSTALLATION IN CHENNAI</b></td>
+                <td style="border:1px solid black;word-wrap: break-word;padding:5px;word-wrap: break-all;text-align:center;width:5%" colspan="4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>GST</b></td>
+                <td style="border:1px solid black;word-wrap: break-word;padding:5px;word-wrap: break-all;text-align:center;width:5%"> {!gst}</td>
+            </tr> 
+            <tr>           
+                <td style="border:1px solid black;word-wrap: break-word;padding:5px; font-size: 7px; break-all;width:5%" colspan="3"><b>2. PAYMENT: 60% ADVANCE, 35% ON DELIVERY &amp; 5% AFTER INSTALLATION</b></td>
+                <td style="border:1px solid black;word-wrap: break-word;padding:5px;word-wrap: break-all;text-align:center;width:5%" colspan="4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>GRAND TOTAL</b></td>
+                <td style="border:1px solid black;word-wrap: break-word;padding:5px;word-wrap: break-all;text-align:center;width:5%">{!grandTotal}</td>
+            </tr> 
+            <tr>           
+                <td style="border:1px solid black;word-wrap: break-word;padding:5px;font-size: 7px; break-all;width:5%" colspan="3"><b>3.WARRANTY : 1 YEAR FOR ANY MANUFACTURING DEFECTS</b></td>
+                <td style="border:1px solid black;word-wrap: break-word;padding:5px;word-wrap: break-all;width:5%" colspan="5" rowspan="2">&nbsp;</td>
+            </tr>
+            <tr>           
+                <td style="border:1px solid black;word-wrap: break-word;padding:5px;font-size: 7px; break-all;width:5%" colspan="3"><b>4. DELIVERY : 6/8 WEEKS AFTER RECEIPT OF PO &amp; ADVANCE</b></td>
+                
+            </tr> -->
+        </table>
+        <table style="width:100%;border:1px solid black;border-collapse:collapse;">
+            <tr>
+                <th style="border: 1px solid black;border-collapse:collapse;">
+                    <div style="background-color: #DCDCDC;padding: 10px;margin-top:10px;">
+                        Payment Terms: 100% Advance payment.
+                    </div>
+                    <div style="width: 100%;padding: 5px;">
+                        <div class="content">
+                            <div style="text-decoration: underline;">Terms And Conditions:</div>
+                            <ul style="font-size:70%;">
+                                <li>{!termsConditions.Warranty__c}</li>
+                                <li>{!termsConditions.Transit_Insurance_New__c}</li>
+                                <li>{!termsConditions.Tax_and_Duties_new__c}</li>
+                                <li>{!termsConditions.Installation_New__c}</li>
+                                <li>{!termsConditions.Unloading_New__c}</li>
+                                <li>{!termsConditions.Supply_New__c}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </th>
+            </tr>
+        </table>
+    </html>
+</apex:page>
