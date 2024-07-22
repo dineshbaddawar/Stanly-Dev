@@ -2,9 +2,9 @@
 
     <div>
         <header class="slds-modal__header">
-                <p>Create Expense And Expense Line Items</p>
+            <p>Create Expense And Expense Line Items</p>
         </header>
-        
+
         <template if:true={expenseItems.length}>
             <table class="slds-table slds-table_cell-buffer slds-table_bordered">
                 <thead class="theadhead">
@@ -23,19 +23,15 @@
                 <tbody>
                     <template for:each={expenseItems} for:item="item">
                         <tr key={item.Id}>
-                            <td class="slds-truncate" >
-                                <div style="margin-left:20px;font-weight: 600;font-size: 15px;font-family: system-ui;">{item.Expense_Line_Item_Type__c}</div>
+                            <td class="slds-truncate">
+                                <div style="margin-left:20px;font-weight: 600;font-size: 15px;font-family: system-ui;">
+                                    {item.Expense_Line_Item_Type__c}</div>
                             </td>
                             <td>
-                                <div class="slds-truncate" >
+                                <div class="slds-truncate">
 
-                                    <lightning-input 
-                                        type="text" 
-                                        variant="standard" 
-                                        name="Actual_Budget__c" 
-                                        value={item.Actual_Budget__c} 
-                                        data-id={item.Id} 
-                                        onchange={handleChange}>
+                                    <lightning-input type="text" variant="standard" name="Actual_Budget__c"
+                                        value={item.Actual_Budget__c} data-id={item.Id} onchange={handleChange}>
                                     </lightning-input>
                                 </div>
                             </td>

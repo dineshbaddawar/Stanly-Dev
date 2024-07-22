@@ -90,14 +90,9 @@ public without sharing class  BeatPlannerHelper {
     @AuraEnabled
     Public static list<Visit__c> getTaskdetails(String accountId){
         System.debug('accountId'+accountId);
-        list<Visit__c> visitrecord=[select Name,Id,KPI_Target__r.Name,Account__c,Duration__c,Description__c,Account__r.Name,Lead__c,Lead__r.Name,Start_Date_Time__c,Route__c,Route__r.Name,Visit_Status__c,Actual_visit_date__c,Planned_visit_date__c,KPI_Target_Name__c,Route_Name__c,Beat_type__c From Visit__c where id =:accountId];
+        list<Visit__c> visitrecord=[select Name,Id,KPI_Target__r.Name,Account__c,Duration__c,Account__r.Name,Lead__c,Lead__r.Name,Start_Date_Time__c,Route__c,Route__r.Name,Visit_Status__c,Actual_visit_date__c,Planned_visit_date__c,KPI_Target_Name__c,Route_Name__c,Beat_type__c From Visit__c where id =:accountId];
         System.debug('visitrecord'+visitrecord);
-        return visitrecord;
-        
+        return visitrecord;        
     }
 
-    
-    
-    
-    
 }

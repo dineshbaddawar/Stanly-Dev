@@ -17,7 +17,7 @@
             <apex:includeScript value="{!URLFOR($Resource.MonthlyVisitViewerJS)}"/>
             <apex:includeScript value="{!URLFOR($Resource.sweetAlert)}"/>
             <style>
-                modal {
+                /* modal {
                 display: none;
                 position: fixed;
                 z-index: 1;
@@ -37,9 +37,9 @@
                 border: 1px solid #888;
                 width: 80%;
                 text-align: center;
-                }
+                } */
                 
-                close {
+                .close {
                 position: absolute;
                 right: 10px;
                 top: 10px;
@@ -163,9 +163,7 @@
                 }
                 .slds-card__body.slds-card__body_inner.mobileObjectSelect{
                 margin-right:-5% !important;
-                }
-                
-                }
+                }                                
             </style>
         </head>
         <body class="slds-scope"> 
@@ -184,11 +182,6 @@
                         <div class="slds-card__header slds-grid">
                             <header class="slds-media slds-media_center slds-has-flexi-truncate">
                                 <div class="slds-media__figure">
-                                    <!--span class="slds-icon_container slds-icon-standard-task" title="task">
-<svg class="slds-icon slds-icon_small" aria-hidden="true" style="background: #5a6ccc;">
-<use xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#user')}"></use>
-</svg>
-</span-->
                                 </div>
                                 <div class="slds-media__body MobileLegendView">
                                     <h2 class="slds-card__header-title MobileH2">
@@ -200,10 +193,12 @@
                                         <div>
                                             <div style="width:15px; height:15px; background-color:red; display: inline-block;">
                                                 
-                                            </div>&nbsp;&nbsp;Pending/Assigned <br/>
+                                            </div>&nbsp;&nbsp;Pending/Assigned
+                                            <br/>
                                             <div style="width:15px; height:15px; background-color:yellow; display: inline-block;">
                                                 
-                                            </div>&nbsp;&nbsp;KPI Tagged <br/>
+                                            </div>&nbsp;&nbsp;KPI Tagged
+                                            <br/>
                                         </div>
                                         <div>
                                             
@@ -256,7 +251,6 @@
                     </article>
                     
                     <!-- lead,Acccoun here New -->
-                    
                     <article class="slds-card mobileObject">
                         <div class="slds-card__header slds-grid " style="display:flex;">
                             <header class="slds-media slds-media_center slds-has-flexi-truncate">
@@ -299,8 +293,8 @@
                         </article> 
                     </article>
                     
-                    
                 </div>
+                
                 <div class="slds-col slds-size_3-of-4">
                     
                     <article class="slds-card" id="calendar-card">
@@ -328,8 +322,6 @@
                             <div style='clear:both'></div>
                         </div>
                     </article>
-                    
-                    
                     
                     <div id="myModal" class="modal fade">
                         <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-hidden="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
@@ -404,7 +396,9 @@
                         </section>
                         <div class="slds-backdrop slds-backdrop_open"></div>
                     </div>
+                    
                 </div>
+                
             </div> 
             
             <!-- address model Account -->
@@ -471,135 +465,123 @@
                 </section>
                 <div class="slds-backdrop slds-backdrop_open"></div>
             </div> 
-
-          <!-- Specifier address model -->
-    <div id="specifieraddress-modal" style="display:none;">
-        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1"
-                class="slds-modal slds-fade-in-open">
-            <div class="slds-modal__container">
-
-                <header class="slds-modal__header">
-                    <button class="close-modals slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
-                        <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
-                            <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
-                        </svg>
-                        <span class="slds-assistive-text">Close</span>
-                    </button>
-                    <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Create Visit</h2>
-                </header>
-
-                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-                    <!-- <fieldset class="slds-form-element">
-                        <legend class="slds-form-element__legend slds-form-element__label">Available Address 1</legend>
-                        <div class="slds-form-element__control" id="specifieraddress-parent">
-                            <span class="slds-radio">
-                                <input type="radio" id="radio-62" value="radio-62" name="default" checked="" />
-                            </span>
+            
+            <!-- Specifier address model -->
+            <div id="specifieraddress-modal" style="display:none;">
+                <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1"
+                         class="slds-modal slds-fade-in-open">
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header">
+                            <button class="close-modals slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
+                                <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                                    <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
+                                </svg>
+                                <span class="slds-assistive-text">Close</span>
+                            </button>
+                            <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate" style="font-style: unset;font-size:25px;">Create Visit</h2>
+                        </header>
+                        
+                        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                            
+                            <div class="slds-grid slds-wrap slds-m-top_large">
+                                <div class="slds-col slds-size_6-of-12" style="padding-right:5px;">
+                                    <span><b>Visit Date</b></span>
+                                    <input type="date" id="date-input-id-11" placeholder="Enter Visit Date" class="slds-input" />
+                                </div>
+                                <div class="slds-col slds-size_6-of-12" style="padding-left:5px;">
+                                    <span><b>Vist Description</b></span>
+                                    <input type="text" id="date-input-id-22"  placeholder="Enter Description" class="slds-input" />
+                                </div>
+                            </div>
+                            
+                            <div class="slds-grid slds-wrap slds-m-top_large">
+                                <div class="slds-col slds-size_6-of-12" style="padding-right:5px;">
+                                    <span><b>Start Time</b></span>
+                                    <input type="time" id="date-input-id-33" placeholder="Enter Start Time" class="slds-input" />
+                                </div>
+                                <div class="slds-col slds-size_6-of-12" style="padding-left:5px;">
+                                    <span><b>End Time</b></span>
+                                    <input type="time" id="date-input-id-44" placeholder="Enter End Time" class="slds-input" />
+                                </div>
+                            </div>
+                            
                         </div>
-                    </fieldset> -->
-
-                    <div class="slds-grid slds-wrap slds-m-top_large">
-                        <div class="slds-col slds-size_4-of-12">
-                            <span>Start Time</span>
-                            <input type="time" id="time-input-id-47" placeholder="Start time" label="Start time" class="slds-input" />
-                        </div>
-                        <div class="slds-col slds-size_1-of-12"></div>
-                        <div class="slds-col slds-size_4-of-12">
-                            <span>End Time</span>
-                            <input type="time" id="time-input-id-48" label="Start time" class="slds-input" />
-                        </div>
-                    </div>
-                    <div class="slds-grid slds-wrap slds-m-top_large">
-                        <div class="slds-col slds-size_4-of-12">
-                            <span>Planned Visit Date 1</span>
-                            <input type="date" id="date-input-id-49" label="Planned Visit Date 2" class="slds-input" />
-                        </div>
-                        <div class="slds-col slds-size_1-of-12"></div>
-                        <div class="slds-col slds-size_4-of-12">
-                            <span>Actual Visit Date</span>
-                            <input type="date" id="date-input-id-50" label="Actual Visit Date" class="slds-input" />
-                        </div>
-                    </div>
-
-                </div>
-                <!--Modal/Popup Box Body Starts here-->
-                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <div id="kpi-radio" class="input-group-text">
+                        <!--Modal/Popup Box Body Starts here-->
+                        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <div id="kpi-radio" class="input-group-text">
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        
+                        <footer class="slds-modal__footer">
+                            <button class="close-modals slds-button slds-button_destructive">Cancel</button>
+                            <button id="save-visitrecord" class="slds-button slds-button_brand">Save</button>
+                        </footer>
                     </div>
-                </div>
-
-                <footer class="slds-modal__footer">
-                    <button class="close-modals slds-button slds-button_neutral">Cancel</button>
-                    <button id="save-event" class="slds-button slds-button_brand">Save</button>
-                </footer>
-            </div>
-        </section>
-        <div class="slds-backdrop slds-backdrop_open"></div>
-    </div> 
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+            </div> 
             
-            
-    <!-- Lead pop -->
-    <div id="address-modallead" style="display:none;">
-        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1"
-                class="slds-modal slds-fade-in-open">
-            <div class="slds-modal__container">
-                <header class="slds-modal__header">
-                    <button class="close-modal slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
-                        <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
-                            <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
-                        </svg>
-                        <span class="slds-assistive-text">Close</span>
-                    </button>
-                    <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate"></h2>
-                </header>
-                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-                    <fieldset class="slds-form-element">
-                        <legend class="slds-form-element__legend slds-form-element__label">Current Address</legend>
-                        <div class="slds-form-element__control" id="address-parentlead">
-                            <span class="slds-radio">
-                                <input type="radio" id="radio-61" value="radio-61" name="default" checked="" />
-                            </span>
-                        </div>
-                    </fieldset>
-                    <div class="slds-grid slds-wrap slds-m-top_large">
-                        <div class="slds-col slds-size_4-of-12">
-                            <span>Start Time</span>
-                            <input type="time" step="900" id="time-input-id-44" placeholder="Start time" label="Start time" class="slds-input" />
-                        </div>
-                        <div class="slds-col slds-size_1-of-12"></div>
-                        <div class="slds-col slds-size_4-of-12">
-                            <span>End Time</span>
-                            <input type="time" id="time-input-id-55" placeholder="End time" label="Start time" class="slds-input" />
-                        </div>
-                    </div>
-                    <div class="slds-grid slds-wrap slds-m-top_large">
-                        <input type="checkbox" id="tagRSM2" name="tagRSM" value="{tagRSM2}"/>
-                        <label for="tagRSM">&nbsp;Tag Manager?</label>
-                    </div>
-                </div>
-                <!--Modal/Popup Box Body Starts here-->
-                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <div id="kpi-radio" class="input-group-text">
+            <!-- Lead pop -->
+            <div id="address-modallead" style="display:none;">
+                <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1"
+                         class="slds-modal slds-fade-in-open">
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header">
+                            <button class="close-modal slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
+                                <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                                    <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
+                                </svg>
+                                <span class="slds-assistive-text">Close</span>
+                            </button>
+                            <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate"></h2>
+                        </header>
+                        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                            <fieldset class="slds-form-element">
+                                <legend class="slds-form-element__legend slds-form-element__label">Current Address</legend>
+                                <div class="slds-form-element__control" id="address-parentlead">
+                                    <span class="slds-radio">
+                                        <input type="radio" id="radio-61" value="radio-61" name="default" checked="" />
+                                    </span>
+                                </div>
+                            </fieldset>
+                            <div class="slds-grid slds-wrap slds-m-top_large">
+                                <div class="slds-col slds-size_4-of-12">
+                                    <span>Start Time</span>
+                                    <input type="time" step="900" id="time-input-id-44" placeholder="Start time" label="Start time" class="slds-input" />
+                                </div>
+                                <div class="slds-col slds-size_1-of-12"></div>
+                                <div class="slds-col slds-size_4-of-12">
+                                    <span>End Time</span>
+                                    <input type="time" id="time-input-id-55" placeholder="End time" label="Start time" class="slds-input" />
+                                </div>
+                            </div>
+                            <div class="slds-grid slds-wrap slds-m-top_large">
+                                <input type="checkbox" id="tagRSM2" name="tagRSM" value="{tagRSM2}"/>
+                                <label for="tagRSM">&nbsp;Tag Manager?</label>
                             </div>
                         </div>
+                        <!--Modal/Popup Box Body Starts here-->
+                        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <div id="kpi-radio" class="input-group-text">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <footer class="slds-modal__footer">
+                            <button class="close-modal slds-button slds-button_neutral">Cancel</button>
+                            <button id="save-eventlead" class="slds-button slds-button_brand">Save</button>
+                        </footer>
                     </div>
-                </div>
-                <footer class="slds-modal__footer">
-                    <button class="close-modal slds-button slds-button_neutral">Cancel</button>
-                    <button id="save-eventlead" class="slds-button slds-button_brand">Save</button>
-                </footer>
-            </div>
-        </section>
-        <div class="slds-backdrop slds-backdrop_open"></div>
-    </div> 
-    <!-- Lead pop -->
-
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+            </div> 
+            <!-- Lead pop -->
             
         </body>
     </html>

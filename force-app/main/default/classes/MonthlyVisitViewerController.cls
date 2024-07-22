@@ -6,7 +6,7 @@
 * @desc [description]
 */
 
-global without sharing class MonthlyVisitViewerController {
+global class MonthlyVisitViewerController {
     
     public boolean displayPopup {get;set;} 
     public void closePopup() {
@@ -41,8 +41,8 @@ global without sharing class MonthlyVisitViewerController {
                     return getAllvisitRecordList;
                 }
             }
-            
         }catch(Exception e){
+            ExceptionHelper.createExceptionLog(e);
             System.debug('Error  === >'+e.getMessage()+' && Error Line ===>'+e.getLineNumber());
         }
         return null;
@@ -54,7 +54,6 @@ global without sharing class MonthlyVisitViewerController {
         System.debug('AssignementGropLocation :'+AssignementGropLocation);
         try{
             List<User> getUserList = new List<User>();
-            
             List<Assignment_Group_Member__c> getGMemList = [SELECT Id,Name,Assignment_Group__r.Name,Group_Member__r.Name FROM Assignment_Group_Member__c WHERE Assignment_Group__r.Name =: AssignementGropLocation];
             Set<String> gorupNameSet = new Set<String>();
                system.debug('getGMemList.Name-->'+getGMemList);
@@ -73,6 +72,7 @@ global without sharing class MonthlyVisitViewerController {
             System.debug('getUserList ::'+getUserList);
             return getUserList;
         }catch(Exception e){
+            ExceptionHelper.createExceptionLog(e);
             System.debug('The Error '+e.getMessage());
             System.debug('Erron Line '+e.getLineNumber());
         }
@@ -82,7 +82,7 @@ global without sharing class MonthlyVisitViewerController {
     // ===============================================================================================================================================================================================================
     // Showing All Routes Name in dropdown
     @RemoteAction
-    global Static List<String> getcurrentUserRoutes(){
+    global Static List<String> getcurrentUserRoutesNew(){
         try{
             List<String> routeList = new List<String>();
             for(Route__c route : [SELECT Id,Name,Route_Name__c,Sales_User__c FROM Route__c WHERE Sales_User__c=:UserInfo.getUserId()]){
@@ -92,6 +92,7 @@ global without sharing class MonthlyVisitViewerController {
                 return routeList;
             }
         }catch(Exception e){
+            ExceptionHelper.createExceptionLog(e);
             System.debug('The Error ::'+e.getMessage() +' AND Error Line No :'+e.getLineNumber());
         }
         return null;
@@ -110,6 +111,7 @@ global without sharing class MonthlyVisitViewerController {
                 return sobjectTypeList;
             }
         }catch(Exception e){
+            ExceptionHelper.createExceptionLog(e);
             System.debug('The Error ::'+e.getMessage() +' AND Error Line No :'+e.getLineNumber());
         }
         return null;
@@ -129,6 +131,7 @@ global without sharing class MonthlyVisitViewerController {
             upsert visitListt;
             return 'visits created successfully.';
         }catch(Exception e){
+            ExceptionHelper.createExceptionLog(e);
             printError(e);
         }
         return 'something went wrong.';
@@ -158,11 +161,11 @@ global without sharing class MonthlyVisitViewerController {
                 return pageData;
             }
         }catch(Exception e){
+            ExceptionHelper.createExceptionLog(e);
             System.debug('The Error ::'+e.getMessage() +' AND Error Line No :'+e.getLineNumber());
         }
         return null;   
     }
-    
     
     // ===============================================================================================================================================================================================================
     @RemoteAction
@@ -204,7 +207,6 @@ global without sharing class MonthlyVisitViewerController {
     // Creare Visit Record on Account & Lead Drag
     @RemoteAction
     global Static String createVisitObjectType(Id SobjectId, string datestring, String geolatitude, String geolongitude){
-        
         System.debug('datestring =====> ' + datestring);
         System.debug('SobjectId :'+SobjectId);
         String sObjName = SobjectId.getSObjectType().getDescribe().getName();
@@ -393,17 +395,16 @@ global without sharing class MonthlyVisitViewerController {
             }       
             return vs.Id;
         }catch(Exception e){
+            ExceptionHelper.createExceptionLog(e);
             System.debug('The Error ::'+e.getMessage() +' AND Error Line No :'+e.getLineNumber());
         }
         return 'ERROR';
     }
     
-    
     static void printError(Exception e) {
         System.debug('--- ErrorMsg :'+e.getMessage());
         System.debug('--- ErrorLineNo :'+e.getMessage());
     }
-    
     
     // ===============================================================================================================================================================================================================
     @RemoteAction
@@ -443,4 +444,32 @@ global without sharing class MonthlyVisitViewerController {
         update visit;
         return 'Success';
     }
+
+    // Create Visit For Specifier 
+    @RemoteAction
+    global static Visit__c createVisitForSpecifier(String SpecifierId,String endtime, String starttime, String datestring, String Description ){
+        System.debug('SpecifierId == >'+SpecifierId+' && endtime === >'+endtime+' && starttime === >'+starttime+' && datestring == >'+datestring+' && Description == >'+Description);
+        try{
+                String[] strtTimeSplit = starttime.split(':');
+                Time StarttimeChange = Time.newInstance( Integer.valueOf(strtTimeSplit[0]) ,Integer.valueOf(strtTimeSplit[1]),0,0); 
+
+                String[] EndTimeSplit = endtime.split(':');
+                Time EndtimeChange = Time.newInstance( Integer.valueOf(EndTimeSplit[0]) ,Integer.valueOf(EndTimeSplit[1]),0,0); 
+
+                Visit__c vs = new Visit__c();
+                vs.Planned_visit_date__c = Date.valueOf(datestring);
+                vs.Specifier__c = SpecifierId;
+                vs.Expected_End_Time__c = StarttimeChange;
+                vs.Expected_Start_Time__c = EndtimeChange;
+                vs.Visit_Status__c = 'New';
+                insert vs;
+                System.debug('vs SP == >'+vs);
+                return vs;
+        }catch(Exception e){
+            ExceptionHelper.createExceptionLog(e);
+            System.debug('The Error ::'+e.getMessage() +' AND Error Line No :'+e.getLineNumber());
+        }
+        return null;  
+    }          
+        
 }
