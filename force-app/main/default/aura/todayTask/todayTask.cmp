@@ -1,5 +1,5 @@
 <aura:component controller="TodayTaskAuraController" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickAction" access="global" >
-
+    
     <aura:attribute name="taskList" type="list"/>
     <aura:attribute name="completedTaskList" type="list"/>
     <aura:attribute name="dateDay" type="String"/>
@@ -74,14 +74,13 @@
                 </div>
                 <div class="buttonContainer" >
                     <!-- <lightning:button onclick="{!c.createMultipleMOM}" label="Create MOM" class="headerButton"/> -->
-                    <lightning:button onclick="{!c.createLeadHandle}" label="New Lead" class="headerButton"/>
+                    <!--lightning:button onclick="{!c.createLeadHandle}" label="New Lead" class="headerButton"/-->
                 </div>
             </lightning:layoutItem>
             <br/>
             <br/>
             
             <!--.///////////////////////////////////// previous date designs ///////////////////////////////////////-->
-            
             
             <div class="dateFilter">
                 <!--lightning:icon iconName="utility:left" size="medium" alternativeText="Back" style="display:inline-block;" onclick="{!c.handlePrevClicked}" class="prevButton"/-->
@@ -114,6 +113,7 @@
             </div>
             
             <!-- ////////////////////////////////////// New Date Designs ///////////////////////////////////////////////// -->
+            
             <div class="slds-col slds-size_11-of-12 newcard" style="">
                 <aura:if isTrue = "{!v.ShowEmptyPage}">
                     <center>
@@ -152,7 +152,12 @@
                                                         <aura:set attribute="else">
                                                             <div data-id="{!val.Lead__c}" onclick="{!c.handleOppClick}" style="cursor:pointer;">
                                                                 <h2 style="text-decoration: underline;"> 
-                                                                    <span>{!val.Lead__r.Name}</span>                           
+                                                                    <aura:if isTrue="{!val.Lead__r.Name !=undefined}">
+                                                                        <span>{!val.Lead__r.Name}</span> 
+                                                                    </aura:if>
+                                                                    <aura:if isTrue="{!val.Specifier__r.Name !=undefined}">
+                                                                        <span>{!val.Specifier__r.Name}</span> 
+                                                                    </aura:if>
                                                                 </h2>
                                                             </div>
                                                         </aura:set>
@@ -250,33 +255,33 @@
                         
                         <div class="mapButtonclass">
                             <aura:if isTrue="{!v.mapbutton}">
-                                    <div class="slds-m-around_xx-large">
-                                      
-                                        <!--Use aura:if tag to display/hide popup based on isModalOpen value-->  
-                                        <aura:if isTrue="{!v.isModalOpen}">
-                                            
-                                            <!-- Modal/Popup Box starts here-->
-                                            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
-                                                <div class="MapContainerBox">
-                                                    <!-- Modal/Popup Box Header Starts here-->
-                                                        <!--lightning:buttonIcon iconName="utility:close"
+                                <div class="slds-m-around_xx-large">
+                                    
+                                    <!--Use aura:if tag to display/hide popup based on isModalOpen value-->  
+                                    <aura:if isTrue="{!v.isModalOpen}">
+                                        
+                                        <!-- Modal/Popup Box starts here-->
+                                        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                                            <div class="MapContainerBox">
+                                                <!-- Modal/Popup Box Header Starts here-->
+                                                <!--lightning:buttonIcon iconName="utility:close"
                                                                               onclick="{! c.closeModel }"
                                                                               alternativeText="close"
                                                                               variant="bare-inverse"
                                                                               class="slds-modal__close"/-->
-                                                    <lightning:icon iconName='action:close' onclick="{! c.closeModel }" alternativeText='close' size='x-small' title='close'></lightning:icon>
-                                                    <!--Modal/Popup Box Body Starts here-->
-                                                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-                                                        <p>
-                                                             <iframe  class=" " src="{!v.siteURL}" width="100%" height="500px;" style="border: hidden;border-radius:13px;border: 1px solid #ccc;background-color: #fff;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);"/>
-                                                        </p>
-                                                    </div>
+                                                <lightning:icon iconName='action:close' onclick="{! c.closeModel }" alternativeText='close' size='x-small' title='close'></lightning:icon>
+                                                <!--Modal/Popup Box Body Starts here-->
+                                                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                                                    <p>
+                                                        <iframe  class=" " src="{!v.siteURL}" width="100%" height="500px;" style="border: hidden;border-radius:13px;border: 1px solid #ccc;background-color: #fff;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);"/>
+                                                    </p>
                                                 </div>
-                                            </section>
-                                            <div class="slds-backdrop slds-backdrop_open"></div>
-                                        </aura:if>
-                                    </div>
-                                    <lightning:icon class="floatingMapButton" onclick="{! c.openMap }"  iconName='action:map' alternativeText='map' size='small' title='map'></lightning:icon>
+                                            </div>
+                                        </section>
+                                        <div class="slds-backdrop slds-backdrop_open"></div>
+                                    </aura:if>
+                                </div>
+                                <lightning:icon class="floatingMapButton" onclick="{! c.openMap }"  iconName='action:map' alternativeText='map' size='small' title='map'></lightning:icon>
                                 
                                 <aura:set attribute="else">
                                     <div >
@@ -332,7 +337,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                   <aura:iteration items="{!v.completedTaskList}" var="val" indexVar="index">
+                                    <aura:iteration items="{!v.completedTaskList}" var="val" indexVar="index">
                                         <tr class="slds-hint-parent">
                                             <td style="color: black;" data-label="SN">{!index + 1}</td>
                                             <td data-label="Date">
@@ -407,15 +412,15 @@
                     </div>
                 </aura:iteration>
             </div>
+            
         </aura:if>
-        
-        
         
         <aura:if isTrue="{!v.showStartVisitComponent}">
             <div >
                 <c:StartVisit visitId="{!v.visitIDtoStart}" currentLatitude= "{!v.currentLatitude}" currentLongitude= "{!v.currentLongitude}" visitRec="{!v.visitRec}" accountAddress="{!v.accountAddress}" accID="{!v.accIdToShow}"/>
             </div>  
         </aura:if>
+        
         <aura:if isTrue="{!not(empty(v.errorMessage))}">
             <div class="slds-text-color_error">{!v.errorMessage}</div>
         </aura:if>
@@ -451,7 +456,7 @@
                 <div class="slds-backdrop slds-backdrop_open"></div>
             </div>
         </aura:if>
-
+        
         <aura:if isTrue="{!v.ShowMOMActivity}">
             <div>
                 <section role="dialog" tabindex="-1" aria-label="Meaningful description of the modal content" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
@@ -492,7 +497,7 @@
                 <div class="slds-backdrop slds-backdrop_open"></div>
             </div>
         </aura:if>
-
+        
         <aura:if isTrue="{!v.showLeadPage}">
             <div>
                 <section role="dialog" tabindex="-1" aria-label="Meaningful description of the modal content" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
@@ -504,27 +509,20 @@
                             </button>
                         </header>
                         <center style="background: rgb(247, 138, 138);font-size: 20px;padding: 5px;"><b>Create Lead</b></center>
-                        <div class="slds-modal__content slds-p-around_medium alignLeft" id="modal-content-id-1"> 
-                            <!--<lightning:recordForm
-                                                    objectApiName="{!v.SobjectApiName}"
-                                                    fields="{!v.fields}"
-                                                    columns="2"
-                                                    oncancel="{!c.onCancelLeadPage}"
-                                                    onsuccess="{!c.handleLeadCreation}" />-->
-                            
+                        <div class="slds-modal__content slds-p-around_medium alignLeft" id="modal-content-id-1">  
                             <lightning:recordEditForm aura:id="recordLeadEditForm" 
                                                       objectApiName="Lead"
                                                       onerror="{!c.handleError}"
                                                       onsuccess="{!c.handleLeadCreation}" >
                                 <div class="slds-section slds-is-open">
-                                        <h3 class="slds-section__title"> 
-                                                <span class="slds-truncate slds-size_12-of-12" title="Section Title" style="Background-color:#F3F3F3;border-radius:0.25rem;padding:3px;"><b>Basic Details</b></span>
-                                        </h3>
-                                    </div>
+                                    <h3 class="slds-section__title"> 
+                                        <span class="slds-truncate slds-size_12-of-12" title="Section Title" style="Background-color:#F3F3F3;border-radius:0.25rem;padding:3px;"><b>Basic Details</b></span>
+                                    </h3>
+                                </div>
                                 <div class="slds-grid">
                                     
                                     <div class="slds-col slds-size_2-of-2">
-                                    	<lightning:inputField fieldName="Name" aura:id="leadLastName"/>
+                                        <lightning:inputField fieldName="Name" aura:id="leadLastName"/>
                                         <lightning:inputField fieldName="Title"/>
                                         <lightning:inputField fieldName="Decision_maker__c" />
                                         <lightning:inputField fieldName="LeadSource"/>
@@ -548,20 +546,20 @@
                                         <lightning:inputField fieldName="Industry"/>
                                         <lightning:inputField fieldName="Phone"/>
                                         <lightning:inputField fieldName="Customer_Presence__c"/>
-                                                         
+                                        
                                     </div>
                                     <div class="slds-col slds-size_1-of-2">
-                                    	
+                                        
                                     </div>
                                 </div>
                                 <div class="slds-section slds-is-open">
-                                        <h3 class="slds-section__title"> 
-                                                <span class="slds-truncate slds-size_12-of-12" title="Section Title" style="Background-color:#F3F3F3;border-radius:0.25rem;padding:3px;"><b>Lead Details</b></span>
-                                        </h3>
-                                    </div>
+                                    <h3 class="slds-section__title"> 
+                                        <span class="slds-truncate slds-size_12-of-12" title="Section Title" style="Background-color:#F3F3F3;border-radius:0.25rem;padding:3px;"><b>Lead Details</b></span>
+                                    </h3>
+                                </div>
                                 <div class="slds-grid">
                                     <div class="slds-col slds-size_2-of-2">
-                                    	<lightning:inputField fieldName="Enquiry_type__c"/>
+                                        <lightning:inputField fieldName="Enquiry_type__c"/>
                                         <lightning:inputField fieldName="Annual_turnover__c"/>
                                         <lightning:inputField fieldName="Annual_Turnover_Unit__c"/>
                                         <lightning:inputField fieldName="Budget__c"/>
@@ -570,20 +568,20 @@
                                         <lightning:inputField fieldName="Customer_expects_any_Exclusivity__c"/>
                                     </div>
                                     <div class="slds-col slds-size_1-of-2">
-                                    	
+                                        
                                     </div>
                                 </div>
                                 <div class="slds-section slds-is-open">
-                                        <h3 class="slds-section__title"> 
-                                                <span class="slds-truncate slds-size_12-of-12" title="Section Title" style="Background-color:#F3F3F3;border-radius:0.25rem;padding:3px;"><b>Address Details</b></span>
-                                        </h3>
-                                    </div>
+                                    <h3 class="slds-section__title"> 
+                                        <span class="slds-truncate slds-size_12-of-12" title="Section Title" style="Background-color:#F3F3F3;border-radius:0.25rem;padding:3px;"><b>Address Details</b></span>
+                                    </h3>
+                                </div>
                                 <div class="slds-grid">
                                     <div class="slds-col slds-size_2-of-2">
                                         <lightning:inputField fieldName="Address"/>
                                     </div>
                                 </div>
-                                 <div class="slds-align_absolute-center slds-border_top" slot="footer">
+                                <div class="slds-align_absolute-center slds-border_top" slot="footer">
                                     <lightning:button label="Cancel" onclick="{!c.onCancelLeadPage}" class="slds-m-top_small" />
                                     <lightning:button label="Save" variant="brand" onclick="{!c.handleLeadSubmit}" class="slds-m-top_small" />
                                 </div> 

@@ -9,7 +9,7 @@ app.controller('userVisitController', function ($scope, $window, $location) {
           lat: 0.0,
           lng: 0.0
      };
-     $scope.userId = userId;
+     $scope.userId = userId; 
      $scope.temp = [];
      $scope.compVisit = [];
      $scope.pendingVisit = [];

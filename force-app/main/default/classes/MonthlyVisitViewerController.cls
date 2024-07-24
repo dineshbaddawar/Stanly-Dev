@@ -35,7 +35,7 @@ global class MonthlyVisitViewerController {
                 System.debug('MBPlist Size ===> '+MBPlist.size());
                 String mbpID =MBPlist[0].Id;
                 system.debug('mbpID === >'+mbpID);
-                List<Visit__c> getAllvisitRecordList = [Select Id,Name,Duration__c,KPI_Target__r.Name,Account__c,Account__r.Name,Lead__c,Lead__r.Name,Start_Date_Time__c,Route__c,Route__r.Name,Visit_Status__c,Actual_visit_date__c,KPI_Target_Name__c,KPI_Target__c From Visit__c Where (Account__c!=NUll OR Lead__c != null) and MBPID__c =:mbpID];
+                List<Visit__c> getAllvisitRecordList = [Select Id,Name,Duration__c,KPI_Target__r.Name,Account__c,Account__r.Name,Lead__c,Lead__r.Name,Start_Date_Time__c,Route__c,Route__r.Name,Visit_Status__c,Actual_visit_date__c,KPI_Target_Name__c,KPI_Target__c,Specifier__r.Name,Specifier__c From Visit__c Where (Account__c!=NUll OR Lead__c != null OR Specifier__c !=null) and MBPID__c =:mbpID];
                 if(getAllvisitRecordList.size()>0){
                     System.debug('getAllvisitRecordList Size ===> '+getAllvisitRecordList.size());
                     return getAllvisitRecordList;
@@ -447,24 +447,42 @@ global class MonthlyVisitViewerController {
 
     // Create Visit For Specifier 
     @RemoteAction
-    global static Visit__c createVisitForSpecifier(String SpecifierId,String endtime, String starttime, String datestring, String Description ){
+    global static Visit__c createVisitForSpecifier(String SpecifierId,String datestring,String starttime,String endtime, String Description ){
         System.debug('SpecifierId == >'+SpecifierId+' && endtime === >'+endtime+' && starttime === >'+starttime+' && datestring == >'+datestring+' && Description == >'+Description);
         try{
-                String[] strtTimeSplit = starttime.split(':');
-                Time StarttimeChange = Time.newInstance( Integer.valueOf(strtTimeSplit[0]) ,Integer.valueOf(strtTimeSplit[1]),0,0); 
-
-                String[] EndTimeSplit = endtime.split(':');
-                Time EndtimeChange = Time.newInstance( Integer.valueOf(EndTimeSplit[0]) ,Integer.valueOf(EndTimeSplit[1]),0,0); 
-
-                Visit__c vs = new Visit__c();
-                vs.Planned_visit_date__c = Date.valueOf(datestring);
-                vs.Specifier__c = SpecifierId;
-                vs.Expected_End_Time__c = StarttimeChange;
-                vs.Expected_Start_Time__c = EndtimeChange;
-                vs.Visit_Status__c = 'New';
-                insert vs;
-                System.debug('vs SP == >'+vs);
-                return vs;
+             List<Weekly_Beat_Plan__c> WBPRec=new List<Weekly_Beat_Plan__c>();
+            String[] strtTimeSplit = starttime.split(':');
+            Time StarttimeChange = Time.newInstance( Integer.valueOf(strtTimeSplit[0]) ,Integer.valueOf(strtTimeSplit[1]),0,0); 
+            
+            String[] EndTimeSplit = endtime.split(':');
+            Time EndtimeChange = Time.newInstance( Integer.valueOf(EndTimeSplit[0]) ,Integer.valueOf(EndTimeSplit[1]),0,0); 
+            if(datestring !=null){
+                Date selectedDate=Date.valueOf(datestring);
+                Integer monthNumber = selectedDate.month();
+                Date weekStart = (selectedDate.toStartofWeek().addDays(1));
+                Date WeekEndDate=weekStart.addDays(6);
+                if(weekStart!=null || WeekEndDate!=null){
+                    WBPRec=[Select Id,Start_Day_of_Week__c,End_Day_of_Week__c,Monthly_Beat_Plan__c From Weekly_Beat_Plan__c Where Start_Day_of_Week__c>=:weekStart AND End_Day_of_Week__c<=:WeekEndDate AND OwnerId =:  UserInfo.getUserId() AND Month__c =: monthNumber];
+                } 
+            } 
+            system.debug('WBPRec === >'+WBPRec);
+            Visit__c vs = new Visit__c();
+            vs.Planned_visit_date__c = Date.valueOf(datestring);
+            vs.Actual_visit_date__c = Date.valueOf(datestring);
+            vs.Specifier__c = SpecifierId;
+            vs.Expected_End_Time__c = StarttimeChange;
+            vs.Expected_Start_Time__c = EndtimeChange;
+            vs.Visit_Status__c = 'New';
+            vs.Assigned_User__c = UserInfo.getUserId();
+            if(WBPRec[0].Monthly_Beat_Plan__c !=null){
+                vs.Monthly_Beat_Plan__c=WBPRec[0].Monthly_Beat_Plan__c; 
+            }
+            if(WBPRec[0].Id!=null){
+                vs.Weekly_Beat_Plan__c=WBPRec[0].Id; 
+            }
+            insert vs;
+            System.debug('Visit Record Created For Specifier == >'+vs);
+            return vs;
         }catch(Exception e){
             ExceptionHelper.createExceptionLog(e);
             System.debug('The Error ::'+e.getMessage() +' AND Error Line No :'+e.getLineNumber());

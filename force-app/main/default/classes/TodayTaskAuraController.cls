@@ -2,8 +2,6 @@ public without sharing class TodayTaskAuraController {
     
     @AuraEnabled
     public static void createVisitActivity(Id opportunityId, Id visitId) {
-        System.debug('opportunityId------>'+opportunityId);
-        System.debug('visitId----->'+visitId);
         if (opportunityId != null && visitId != null) {
             Visit_Activity__c visitActivity = new Visit_Activity__c();
             visitActivity.Opportunity__c = opportunityId;
@@ -33,18 +31,9 @@ public without sharing class TodayTaskAuraController {
         Date WeekEndDate = weekStart.addDays(6);
         
         if (weekStart != null && WeekEndDate != null) {
-            WBPRec = [SELECT Id, Start_Day_of_Week__c, End_Day_of_Week__c, Monthly_Beat_Plan__c 
-                      FROM Weekly_Beat_Plan__c 
-                      WHERE Start_Day_of_Week__c >= :weekStart 
-                      AND End_Day_of_Week__c <= :WeekEndDate 
-                      AND OwnerId = :UserInfo.getUserId() 
-                      AND Month__c = :monthNumber];
+            WBPRec = [SELECT Id, Start_Day_of_Week__c, End_Day_of_Week__c, Monthly_Beat_Plan__c  FROM Weekly_Beat_Plan__c   WHERE Start_Day_of_Week__c >= :weekStart  AND End_Day_of_Week__c <= :WeekEndDate  AND OwnerId = :UserInfo.getUserId() AND Month__c = :monthNumber];
         }
-        
-        Lead ldRec = [SELECT Id, Mark_Visit_as_Completed__c, Street, City, State, PostalCode, Country,/* StateCode, CountryCode,*/ Latitude, Longitude 
-                      FROM Lead 
-                      WHERE Id = :leadId];
-        
+        Lead ldRec = [SELECT Id, Mark_Visit_as_Completed__c, Street, City, State, PostalCode, Country,/* StateCode, CountryCode,*/ Latitude, Longitude  FROM Lead  WHERE Id = :leadId];
         for (Weekly_Beat_Plan__c wbp : WBPRec) {
             Visit__c visitRec = new Visit__c();
             visitRec.Lead__c = leadId;
@@ -60,11 +49,9 @@ public without sharing class TodayTaskAuraController {
             visitRec.Country__c = ldRec.Country;
             visitRec.Geo_Location__Latitude__s = ldRec.Latitude;
             visitRec.Geo_Location__Longitude__s = ldRec.Longitude;
-            visitRec.Visit_Status__c = ldRec.Mark_Visit_as_Completed__c ? 'Completed' : 'Assigned';
-            
+            visitRec.Visit_Status__c = ldRec.Mark_Visit_as_Completed__c ? 'Completed' : 'Assigned';   
             visitList.add(visitRec);
         }
-        
         try {
             if (!visitList.isEmpty()) {
                 Insert visitList;
@@ -77,16 +64,14 @@ public without sharing class TodayTaskAuraController {
         return null;
     }
     
-    
     //method for getting all visit records based on date passed
     @AuraEnabled
     public static todaytaskWrapper getAllVisitToday(String visitDate){
-        System.debug('visitDate-------->'+visitDate);
+        System.debug('visitDate ===>>'+visitDate);
         List<Visit__c> visitListToShow = new List<Visit__c>();
         try{
             Approval_Process_Requirement__c aList = Approval_Process_Requirement__c.getInstance('Field Visit');
             Boolean isApproval = aList.isApprovalRequired__c;  
-            
             if(String.isNotBlank(visitDate)){
                 String[] arrTest = visitDate.split('T');
                 string[] dateArray = arrTest[0].split('-');
@@ -94,27 +79,16 @@ public without sharing class TodayTaskAuraController {
                 Integer month = Integer.valueOf(dateArray[1]);
                 Integer day = Integer.valueOf(dateArray[2]);
                 date VisitFormatedDate = date.newInstance(year, month, day);
-                System.debug('VisitFormatedDate-->'+VisitFormatedDate);
+                System.debug('VisitFormatedDate ==>>'+VisitFormatedDate);
                 Id currentUserId = UserInfo.getUserId();
-                /*visitListToShow = [SELECT Id, Name, Lead__r.Name, Status__c, Account__c, Duration__c, Account__r.Name, Account__r.Website, Account__r.Email__c, Account__r.Phone,  Visit_Time__c,Visit_Status__c,Check_In_Time__c,
-                                   Planned_visit_date__c, Weekly_Beat_Plan__c, KPI_Target__c, KPI_Target__r.KPI_Target_Name__c,Account__r.BillingStreet, Account__r.BillingCity, Account__r.BillingState,
-                                   Account__r.BillingPostalCode,Account__r.BillingCountry,Geo_Location__latitude__s, Geo_Location__longitude__s, Weekly_Beat_Plan__r.Monthly_Beat_Plan__r.Approval_Status__c,Expected_Start_Time__c 
-                                   FROM Visit__c 
-                                   WHERE Planned_visit_date__c=:VisitFormatedDate 
-                                   AND ( (Account__r.BillingStreet !=null AND Account__r.BillingCity !=null) OR (Lead__r.Street != null AND Lead__r.City != null) ) 
-                                   AND Assigned_User__c=: currentUserId AND Status__c != 'Completed'];*/
                 visitListToShow = [SELECT Id, Name, Status__c, Account__c, Duration__c, Account__r.Name, Account__r.Website, Account__r.Email__c, Account__r.Phone,  Visit_Time__c,Visit_Status__c,Check_In_Time__c,
                                    Planned_Visit_Date__c, Weekly_Beat_Plan__c, KPI_Target__c, KPI_Target__r.KPI_Target_Name__c,Account__r.BillingStreet, Lead__r.FirstName, Account__r.BillingCity, Account__r.BillingState,
                                    Account__r.BillingPostalCode,Account__r.BillingCountry,Geo_Location__latitude__s, Geo_Location__longitude__s, Weekly_Beat_Plan__r.Monthly_Beat_Plan__r.Approval_Status__c,Expected_Start_Time__c,
-                                   Lead__c, Lead__r.Name, Lead__r.City, Lead__r.Street, /*Lead__r.StateCode, Lead__r.CountryCode*/Lead__r.PostalCode FROM Visit__c 
+                                   Lead__c, Lead__r.Name, Lead__r.City, Lead__r.Street,Lead__r.PostalCode,Specifier__c,Specifier__r.Name,Specifier__r.Street_Address__c FROM Visit__c 
                                    WHERE Planned_Visit_Date__c=:VisitFormatedDate 
-                                   AND (Lead__r.Street != null OR Account__r.BillingStreet != null) 
-                                   AND (Lead__r.City != null OR Account__r.BillingCity != null) 
-                                   /*AND (Lead__r.StateCode != null OR Account__r.BillingState != null) */
-                                   AND (Lead__r.PostalCode != null OR Account__r.BillingPostalCode != null) 
+                                   AND (Lead__r.Street != null OR Account__r.BillingStreet != null OR Specifier__r.Street_Address__c != null) 
                                    AND Assigned_User__c=: currentUserId AND Status__c != 'Completed'];
-                
-                System.debug('visitListToShow-->'+visitListToShow);
+                System.debug('visitListToShow Size == >>'+visitListToShow.size());
                 if(visitListToShow.size()>0){
                     integer compVisitCount=0;
                     integer pendingVisitCount =0;
@@ -143,14 +117,6 @@ public without sharing class TodayTaskAuraController {
                     wrap.completedVisit = compVisitCount;
                     wrap.pendingVisit = pendingVisitCount;
                     wrap.useApprovalProcess = isApproval;
-                    /*wrap.completedVisitList = [SELECT Id, Name, Status__c, Account__c,Lead__c, Duration__c,District__c,Actual_Visit_Date__c, Visit_Objective__c, Taluk__c, Night_stay__c, Account__r.Name, Account__r.Website, Account__r.Email__c, Account__r.Phone,  Visit_Time__c,Visit_Status__c,Check_In_Time__c,
-                                   Planned_Visit_Date__c, Weekly_Beat_Plan__c, KPI_Target__c, KPI_Target__r.KPI_Target_Name__c,Account__r.BillingStreet, Account__r.BillingCity, Account__r.BillingState,
-                                   Account__r.BillingPostalCode,Account__r.BillingCountry,Geo_Location__latitude__s, Geo_Location__longitude__s,Lead__r.Name, Lead__r.Phone, Lead__r.Email,Lead__r.Street,
-                                   Lead__r.City,Lead__r.PostalCode,Lead__r.StateCode,Lead__r.CountryCode, Weekly_Beat_Plan__r.Monthly_Beat_Plan__r.Approval_Status__c 
-                                   FROM Visit__c 
-                                   WHERE Planned_Visit_Date__c=:VisitFormatedDate 
-                                   AND ((Account__r.BillingStreet != null AND Account__r.BillingCity != null) OR (Lead__r.Street != null AND Lead__r.City != null))
-                                   AND Assigned_User__c=: currentUserId AND Status__c = 'Completed'];*/
                     if(!dayVisitList.isEmpty()){
                         wrap.dvpList = dayVisitList;
                     }
@@ -167,7 +133,7 @@ public without sharing class TodayTaskAuraController {
     
     @AuraEnabled
     public static todaysCompletedTaskWrapper GetCompletedVisitRecords(String visitDate){
-        System.debug('visitDate------>'+visitDate);
+        System.debug('visitDate ==>>'+visitDate);
         List<Visit__c> visitListToShow = new List<Visit__c>();
         try{
             if(String.isNotBlank(visitDate)){
@@ -229,6 +195,7 @@ public without sharing class TodayTaskAuraController {
         }
         return null;
     }
+    
     public class todaysCompletedTaskWrapper{
         @AuraEnabled
         public Integer completedVisit;
@@ -244,7 +211,6 @@ public without sharing class TodayTaskAuraController {
         public boolean isApproved;
     }
     
-    
     // ==========================================================================================================================================================================================================
     // Method get Selected Vist Recor Details
     @AuraEnabled
@@ -253,7 +219,8 @@ public without sharing class TodayTaskAuraController {
         try{
             if(String.isNotBlank(visitId)){
                 visitRec = [SELECT Id, Name, Status__c, Lead__c, Account__c, Duration__c, Lead__r.Name, Lead__r.Website, Lead__r.Email, Lead__r.Phone, Account__r.Name, Account__r.Website, Account__r.Email__c, Account__r.Phone,  Account__r.Customer_Contact__c, Lead__r.Street, Lead__r.City, Lead__r.State,Lead__r.PostalCode,Lead__r.Country,
-                            CheckIn__Latitude__s, Check_Out__Latitude__s, Visit_Time__c, Planned_visit_date__c, Weekly_Beat_Plan__c, KPI_Target__c, KPI_Target__r.KPI_Target_Name__c,Account__r.BillingStreet, Account__r.BillingCity, Account__r.BillingState,Account__r.BillingPostalCode,Account__r.BillingCountry FROM Visit__c WHERE Id=:visitId LIMIT 1];
+                            Specifier__c,Specifier__r.Name,Specifier__r.Email,Specifier__r.Phone,Specifier__r.Street_Address__c,Specifier__r.City_Address__c,Specifier__r.Zip_Postal_Code__c,Specifier__r.State_Province__c,Specifier__r.Country__c,Street__c,City__c,Postal_Code__c,State__c,Country__c,
+                            CheckIn__Latitude__s, Check_Out__Latitude__s, Visit_Time__c,Expected_Start_Time__c, Planned_visit_date__c, Weekly_Beat_Plan__c, KPI_Target__c, KPI_Target__r.KPI_Target_Name__c,Account__r.BillingStreet, Account__r.BillingCity, Account__r.BillingState,Account__r.BillingPostalCode,Account__r.BillingCountry FROM Visit__c WHERE Id=:visitId LIMIT 1];
                 if(visitRec !=null){
                     System.debug('visitRec === >'+visitRec);
                     return visitRec;
@@ -292,15 +259,11 @@ public without sharing class TodayTaskAuraController {
         DateTime todayDate = system.now();
         String monthName = todayDate.format('MMMMM');
         Date todayDate2 = system.today();
-        //monthName = '\'%' + monthName + '%\'';
         String yearName = String.valueOf(todayDate.Year());
         Id currUserId = UserInfo.getUserId();
-        System.debug('monthName-->'+ monthName);
-        System.debug('yearName-->'+ yearName);
         Monthly_Travel_Expense__c mte;
         List<Monthly_Travel_Expense__c> mteList = [select id from Monthly_Travel_Expense__c WHERE Month_Name__c =:monthName AND Year__c =:yearName AND Sales_User__c =:currUserId limit 1];
-        //Monthly_Travel_Expense__c mte = [select id from Monthly_Travel_Expense__c WHERE Month_Name__c =:monthName AND Expense_Year__c =:yearName AND Sales_User__c =:currUserId limit 1];
-        System.debug('mteList-->' + mteList);
+        System.debug('mteList ==>>' + mteList);
         if(mteList.size()==0){
             mte = new Monthly_Travel_Expense__c();
             String mteName = 'MTE - ' + monthName;
@@ -422,9 +385,6 @@ public without sharing class TodayTaskAuraController {
             if(taskRec !=null){
                 System.debug('taskRec === >'+taskRec);
                 taskRec.OwnerId = userInfo.getUserId();
-                /*DateTime dt = System.Now();
-Date myDate = date.newinstance(dT.year(), dT.month(), dT.day());
-taskRec.ActivityDate = myDate;*/
                 insert taskRec;
             }
         }catch(Exception e){
@@ -504,14 +464,14 @@ taskRec.ActivityDate = myDate;*/
                 visRec.Check_Out_Time__c = System.now();
                 visRec.Distance_Km__c=Location.getDistance(updateLocationDis.Start_Location__c, visitCheckOut, 'km');
                 update visRec;
+                 System.debug('Check Out Visit Update Record === >'+visRec);
                 
                 Day_Visit_Plan__c updatDayVsitStartLocation  = new Day_Visit_Plan__c();
                 updatDayVsitStartLocation.Start_Location__Latitude__s=Decimal.valueOf(checkOutLat);
                 updatDayVsitStartLocation.Start_Location__Longitude__s=Decimal.valueOf(checkOutLong);
                 updatDayVsitStartLocation.id=updateLocationDis.id;
                 update updatDayVsitStartLocation;
-                System.debug('Check Out Visit Update Record === >'+visRec);
-                
+                System.debug('Day Visit Plan Update Record === >'+updatDayVsitStartLocation);
                 return visRec;
             }
         }catch(Exception e){
@@ -520,7 +480,6 @@ taskRec.ActivityDate = myDate;*/
         }
         return null;
     }
-    
     
     //==========================================================================================================================================================================================================
     // Method for getting Past Visit Records
@@ -548,7 +507,6 @@ taskRec.ActivityDate = myDate;*/
     
     //==========================================================================================================================================================================================================
     // Method for getting Related Opportunities List
-    
     @AuraEnabled
     public static List<Opportunity> getRelOppList(String accId){
         List<Opportunity> oppList = new List<Opportunity>();
@@ -566,7 +524,7 @@ taskRec.ActivityDate = myDate;*/
         }
         return null;
     }
-        
+    
     @AuraEnabled
     public static List<Invoices__c> getRelInvoiceList(String accId){
         List<Invoices__c> invList = new List<Invoices__c>();
@@ -635,7 +593,7 @@ taskRec.ActivityDate = myDate;*/
         String plainTextBody = temp.body;
         Visit__c visitRec = new Visit__c();
         OrgWideEmailAddress owea = [ SELECT Id, Address, DisplayName FROM OrgWideEmailAddress where DisplayName = 'Symega Food Ingredients Limited' ];
-        system.debug('owea--->'+owea);
+        system.debug('owea ==>>'+owea);
         try{
             if(subject !=null && visitId !=null && accId !=null){
                 visitRec = [SELECT Id,Name FROM Visit__c WHERE ID=:visitId LIMIT 1];
@@ -691,7 +649,7 @@ taskRec.ActivityDate = myDate;*/
         }
         return null;
     }
-
+    
     // ===========================================================================================================================================================================================================
     @AuraEnabled
     public static String createMomActivityLog1(String description, String visitId,String accId,String subject,String salesUserId,string stackholderEmail){
@@ -772,7 +730,7 @@ taskRec.ActivityDate = myDate;*/
         }
         return null;
     }
-
+    
     // ===========================================================================================================================================================================================================
     // Method for Creating Activit Mom Log and Send Email to Enter Stock Email
     @AuraEnabled 
@@ -793,7 +751,7 @@ taskRec.ActivityDate = myDate;*/
         }
         return null;
     }
-
+    
     // ===========================================================================================================================================================================================================
     //Added by Anjali
     @AuraEnabled
@@ -956,35 +914,27 @@ taskRec.ActivityDate = myDate;*/
         public PicklistEntryWrapper(){            
         }   
     }
-
+    
     // ===========================================================================================================================================================================================================
     @AuraEnabled 
     public static Map<String, Map<String, List<Route_Master__c>>> populateRoute(String city1,String state1){
-        
         List<Route_Master__c> routeRecords = [SELECT Id, State__c, City__c,Name FROM Route_Master__c WHERE City__c =:city1 AND State__c =:state1];
         System.debug('city1=>'+city1);
         System.debug('state1=>'+state1);
-        
         Map<String, Map<String, List<Route_Master__c>>> routeMap = new Map<String, Map<String, List<Route_Master__c>>>();
-        
         for(Route_Master__c rc: routeRecords) {
             String state = rc.State__c;
             String city = rc.City__c;
             String routeName = rc.Name;
-            
             if(!routeMap.containsKey(state)) {
                 routeMap.put(state, new Map<String, List<Route_Master__c>>());
             }
-            
             Map<String, List<Route_Master__c>> cityRouteMap = routeMap.get(state);
-            
             if(!cityRouteMap.containsKey(city)) {
                 cityRouteMap.put(city, new List<Route_Master__c>());
             }
-            
             cityRouteMap.get(city).add(rc);
         }
-        
         return routeMap;
     }
     
@@ -1004,7 +954,6 @@ taskRec.ActivityDate = myDate;*/
             System.debug('state==> ' + state);
             System.debug('routeName==> ' + routeName);
             System.debug('salesUser==> ' + salesUser);
-            // Retrieve the current user's ID
             Id currUserId = UserInfo.getUserId();
             Route__c newRoute = new Route__c();
             newRoute.City__c = city;
@@ -1049,8 +998,6 @@ taskRec.ActivityDate = myDate;*/
             Date todayDate2 = system.today();
             String yearName = String.valueOf(todayDateTime.Year());
             Id currUserId = UserInfo.getUserId();
-            System.debug('monthName-->'+ monthName);
-            System.debug('yearName-->'+ yearName);
             Monthly_Travel_Expense__c mte;
             List<Monthly_Travel_Expense__c> mteList = [select id from Monthly_Travel_Expense__c WHERE Month_Name__c =:monthName AND Year__c =:yearName AND Sales_User__c =:currUserId limit 1];
             System.debug('mteList-->' + mteList);
@@ -1075,7 +1022,7 @@ taskRec.ActivityDate = myDate;*/
                     System.debug('todayDate-->'+ todayDate);
                     System.debug('userId-->'+ userId);
                     System.debug('mte.Id-->'+ mte.Id);
-
+                    
                     List<Day_Visit_Plan__c> dayVisitPlanList = [SELECT Id FROM Day_Visit_Plan__c WHERE DAY_ONLY(Start_Date__c) = TODAY AND Service_Executive__c =: userId AND Monthly_Travel_Expense__c =: mte.Id];
                     System.debug('dayVisitPlanList-->'+ dayVisitPlanList);
                     if(dayVisitPlanList.size() > 0){

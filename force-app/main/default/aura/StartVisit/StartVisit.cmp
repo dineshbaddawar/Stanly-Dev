@@ -2,8 +2,10 @@
     <aura:attribute name="atr1" type="string" />
     <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
     <aura:attribute name="accountId" type="String"/>
+    <aura:attribute name="sepcifierId" type="String"/>
     <aura:attribute name="spinner" type="boolean" default="false"/>
     <aura:attribute name="showPopupModal" type="boolean" default="false"/>
+    <aura:attribute name="showPopupVisitUpdateStatus" type="boolean" default="false"/>
     
     <aura:attribute name="siteURL" type="String"/> 
     <aura:attribute name="showCreateTask" type="boolean" default="false"/>
@@ -46,14 +48,15 @@
     <aura:attribute name="url" type="String"/>
     <aura:attribute name="pageReference" type="Object"/>
     <lightning:pageReferenceUtils aura:id="pageRefUtils"/>
-    <aura:attribute name="ShowLogMOM" type="boolean" default="false"/>
+    <aura:attribute name="ShowUpdateVisitPage" type="boolean" default="false"/>
     <aura:attribute name="logMomDescription" type="String"/>
     <aura:attribute name="logMomSubject" type="String"/>
     <aura:attribute name="stackEmail" type="String"/>
     <aura:attribute name="auraUserId" type="String" />
+     <aura:attribute name="showGenerateLeadPage" type="boolean" default="false"/>
+     <aura:attribute name="isFieldVisible" type="boolean" default="false"/>
     
     <!-- Added by Anjali -->
-    
     <aura:attribute name="showAddressPage" type="boolean" default="true" />
     
     <aura:attribute name="ship_addresses" type="List" />
@@ -80,8 +83,6 @@
     <aura:attribute name="customShipAdrsId" type="String" />
     <aura:attribute name="accBillAdrs" type="Boolean" />
     <aura:attribute name="customBillAdrsId" type="String" />
-    <!---->
-    
     <aura:registerEvent name="fieldVisitComponentEvent" type="c:fieldVisitComponentEvent"/>
     
     <aura:html tag="style">
@@ -102,6 +103,7 @@
     </aura:if>
     <!-- Loading spinner end-->   
     
+     <!-- Check in Popup-->
     <aura:if isTrue="{!v.showPopupModal}">
         <section  role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-align_absolute-center ">
             <div class="slds-modal__container checkBox"> 
@@ -123,6 +125,124 @@
             </div>
         </section>
         <div class="slds-backdrop slds-backdrop_open"></div>
+    </aura:if>
+    
+    <!-- FinalVisitUpdateStatusPopUp-->
+    <aura:if isTrue="{!v.showPopupVisitUpdateStatus}">
+     <div class="slds-m-around_large">
+    <lightning:button variant="brand" label="What is Modal/PopUp Box?" onclick="{!c.openModel}" />
+    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+            <header class="slds-modal__header">
+                <lightning:buttonIcon iconName="utility:close" onclick="{!c.closeModel}" alternativeText="close" variant="bare-inverse" class="slds-modal__close"/>
+                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate"><b>Update Final Visit Status</b></h2>
+            </header>
+            
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">   
+                <div class="slds-grid">
+                    <div class="slds-col slds-size_1-of-2 slds-text-align_center">
+                        <lightning:button label="𝐋𝐞𝐚𝐝 𝐆𝐞𝐧𝐞𝐫𝐚𝐭𝐞𝐝" onclick="{!c.OpenLeadGenerateModel}" class="slds-button slds-button_brand"/>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-text-align_center slds-p-left_small">
+                        <lightning:button label="𝐒𝐜𝐡𝐞𝐝𝐮𝐥𝐞 𝐍𝐞𝐱𝐭 𝐕𝐢𝐬𝐢𝐭" onclick="{!c.submitDetails}" class="slds-button slds-button_brand"/>
+                    </div>
+                </div>
+            </div>
+            
+            <footer class="slds-modal__footer ">
+                <lightning:button class="slds-align_absolute-center" variant="destructive" label="Cancel" onclick="{!c.closeModel}" />
+            </footer>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+</div>
+
+    </aura:if>
+    
+       
+        <!--LeadGeneratePage-->
+    <aura:if isTrue="{!v.showGenerateLeadPage}">
+        <div>
+            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <div class="slds-modal__header">
+                        <lightning:buttonIcon iconName="utility:close" onclick="{!c.closeModelGenerateLead}" alternativeText="close" variant="bare-inverse" class="slds-modal__close"/>
+                    </div>
+                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                        <div class="slds-border_bottom slds-align_absolute-center">
+                            <h1 style="font-size:20px;">New Lead</h1>
+                        </div><br/>
+                        <lightning:recordEditForm aura:id="recordCaseEditForm"  objectApiName="Lead"  onerror="{!c.handleError}" onsuccess="{!c.genereateLeadRecord}" >   
+                            
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_1-of-2">
+                                     <lightning:inputField fieldName="LastName" /> 
+                                </div>
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning:inputField fieldName="Company" /> 
+                                </div>
+                            </div>
+                             <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning:inputField fieldName="BD_Catogory__c" /> 
+                                </div>
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning:inputField fieldName="Client_Location_City__c" /> 
+                                </div>
+                            </div>
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_1-of-2">
+                                  <lightning:inputField fieldName="Lead_Type__c" /> 
+                                </div>
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning:inputField fieldName="Lead_Details__c" /> 
+                                </div>
+                            </div>
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning:inputField fieldName="Follow_Up_Date_Time__c" /> 
+                                </div>
+                                <div class="slds-col slds-size_1-of-2">
+                                     <lightning:inputField fieldName="Action__c" /> 
+                                </div>
+                            </div>
+                             <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning:inputField fieldName="Responsible__c" /> 
+                                </div>
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning:inputField fieldName="Status" /> 
+                                </div>
+                            </div>
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_1-of-2">
+                                   <lightning:inputField fieldName="Estimated_Date_of_Quote__c" /> 
+                                </div>
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning:inputField fieldName="Approx_Value__c" /> 
+                                </div>
+                            </div>
+                             <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_1-of-2">
+                                     <lightning:inputField fieldName="Description" /> 
+                                </div>
+                                 <div class="slds-col slds-size_1-of-2">
+                                     <lightning:inputField fieldName="Specifier__c" value="{!v.sepcifierId}" />
+                                 </div>
+                            </div>
+                            <div class="slds-align_absolute-center slds-border_top" slot="footer">
+                                <span style="margin-right: 40px;">
+                                    <lightning:button label="Cancel"  variant="destructive" onclick="{!c.closeModelGenerateLead}" class="slds-m-top_small slds-m-right_small" />
+                                </span>
+                                <lightning:button label="Submit" variant="success" onclick="{!c.genereateLeadRecord}" class="slds-m-top_small slds-m-left_small" />
+                            </div>
+ 
+                        </lightning:recordEditForm> 
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </div>
     </aura:if>
     
     
@@ -164,7 +284,6 @@
             </div>
         </div>
         
-        
         <lightning:LayoutItem padding="horizontal-small" size="8">
             <div class="DesktopCard">
                 <lightning:LayoutItem size="12">
@@ -197,7 +316,9 @@
                                                     {!v.visitRec.Lead__r.Phone}
                                                 </aura:set>
                                             </aura:if>
-                                            
+                                            <aura:if isTrue="{!v.visitRec.Specifier__c != null}">
+                                                {!v.visitRec.Specifier__r.Phone}
+                                            </aura:if>
                                         </div>
                                     </lightning:LayoutItem>
                                 </lightning:Layout>
@@ -216,6 +337,9 @@
                                                     {!v.visitRec.Lead__r.Email}
                                                 </aura:set>
                                             </aura:if>
+                                            <aura:if isTrue="{!v.visitRec.Specifier__c != null}">
+                                                {!v.visitRec.Specifier__r.Email}
+                                            </aura:if>
                                         </div>
                                     </lightning:LayoutItem>
                                     <lightning:LayoutItem size="6">
@@ -226,7 +350,14 @@
                                     </lightning:LayoutItem>
                                     <lightning:LayoutItem size="3">
                                         <div style=" padding-left: 12%; justify-content: flex-start; align-items: center; gap: 4px;  color: black; font-size: 12px; font-family: Lato; font-weight: 600; word-wrap: break-word; display: inline-block;">Visit Time:</div>
-                                        <div style=" padding-left: 1%; justify-content: flex-start; color: #7D7D7D; font-size: 12px; font-family: Lato; font-weight: 400; word-wrap: break-word; display: inline-block;">{!v.visitRec.Visit_Time__c}</div>
+                                        <div style=" padding-left: 1%; justify-content: flex-start; color: #7D7D7D; font-size: 12px; font-family: Lato; font-weight: 400; word-wrap: break-word; display: inline-block;">
+                                            <aura:if isTrue="{!v.visitRec.Specifier__c != null}">
+                                                {!v.visitRec.Expected_Start_Time__c}
+                                                <aura:set attribute="else">
+                                                    {!v.visitRec.Visit_Time__c}
+                                                </aura:set>
+                                            </aura:if>
+                                        </div>
                                     </lightning:LayoutItem>
                                 </lightning:Layout>
                                 
@@ -267,21 +398,6 @@
             <div class="slds-card ">
                 <div class="">
                     <aura:if isTrue="{!v.ShowModal}">
-                        <!-- <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open">
-                            <div class="slds-modal__container oppCreationBox">
-                                <div class="slds-modal__header">
-                                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">New Opportunity</h1>
-                                </div>
-                                <div class="slds-modal__content slds-p-around_medium" >
-                                    <lightning:recordForm
-                                                          objectApiName="{!v.SobjectApiName}"
-                                                          fields="{!v.fields}"
-                                                          columns="1"
-                                                          oncancel="{!c.onCancel}"
-                                                          onsuccess="{!c.handleSuccess}" />
-                                </div>
-                            </div>
-                        </section> -->
                         
                         <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open">
                             <div class="slds-modal__container">
@@ -293,15 +409,8 @@
                                                           class="slds-modal__close"/>
                                 </div>
                                 <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-                                    <!-- <c:lWCComponent2 aura:id="lWCComponent2"></c:lWCComponent2>   -->
-                                    <!-- <c:createOpportunityOnAccount aura:id="createOpportunity" recordId="{!v.accID}" ></c:createOpportunityOnAccount> -->
-                                    <!-- <lightning:recordForm
-                                                          objectApiName="{!v.SobjectApiName}"
-                                                          fields="{!v.fields}"
-                                                          columns="2"
-                                                          oncancel="{!c.onCancel}"
-                                                          onsuccess="{!c.handleSuccess}" /> -->
                                     
+                                    <!--AddressPage1-->
                                     <aura:if isTrue="{!v.showAddressPage}">
                                         <h3>Shipping Address</h3><br/>
                                         <div class="slds-scrollable_x">
@@ -321,9 +430,6 @@
                                                 <tbody>
                                                     <aura:iteration items="{!v.ship_addresses}" var="address" indexVar="index">
                                                         <tr key="{!address.id}">
-                                                            <!-- <td>
-                                                                <lightning:input type="checkbox" name="{!index}" value="{!address.id}" checked="{!address.checked}" onchange="{!c.onAddressSelect}" />
-                                                            </td> -->
                                                             <td>
                                                                 <input type="radio" id="{!address.id}" name="shippingOptions" checked="{!address.checked}" onclick="{!c.onAddressSelect}"  />
                                                             </td>
@@ -360,9 +466,6 @@
                                                 <tbody>
                                                     <aura:iteration items="{!v.bill_addresses}" var="address" indexVar="index">
                                                         <tr key="{!address.id}">
-                                                            <!-- <td>
-                                                                <lightning:input type="checkbox" data-index="{!index}" data-id="{!address.id}" checked="{!address.checked}" onchange="{!c.onBillAddressSelect}" />
-                                                            </td> -->
                                                             <td>
                                                                 <input type="radio" id="{!address.id}" name="billingOptions" checked="{!address.checked}" onclick="{!c.onBillAddressSelect}"  />
                                                             </td>
@@ -386,8 +489,8 @@
                                                 <lightning:button variant="brand" label="Next" class="slds-m-left_x-small" onclick="{!c.handleNavigate}" />
                                             </div>
                                         </div>
+                                        <!--OpportunityCreatePage1-->
                                         <aura:set attribute="else">
-                                            <!-- <lightning:card> -->
                                             <div class="slds-border_bottom slds-align_absolute-center">
                                                 <h1 style="font-size:20px;">Create Opportunity</h1>
                                             </div><br/>
@@ -445,8 +548,8 @@
                                                     <lightning:button label="Save" variant="brand" onclick="{!c.handleMOppSubmit}" class="slds-m-top_small" />
                                                 </div>  
                                             </lightning:recordEditForm> 
-                                            <!-- </lightning:card> -->
                                         </aura:set>
+                                        
                                     </aura:if>               
                                     
                                 </div>
@@ -491,6 +594,8 @@
                 </div>
                 
                 <lightning:tabset>
+                    
+                    <!--TabActivity1-->
                     <lightning:tab label="Activity">
                         <div class="dataTableMobile">
                             <aura:iteration items="{!v.relActivityList}"  var="pastVisitRec" indexVar="index">
@@ -507,6 +612,8 @@
                             </aura:iteration>
                         </div>
                     </lightning:tab>
+                    
+                    <!--TabPastVisits1-->
                     <lightning:tab label="Past Visits">
                         <div class="dataTableMobile">
                             <aura:iteration items="{!v.pastVisitList}"  var="pastVisitRec" indexVar="index">
@@ -524,11 +631,10 @@
                             </aura:iteration>
                         </div>
                     </lightning:tab>
-                    <aura:if isTrue="{!v.visitRec.Account__c != null}">
-                        <!-- lightning:tab label="Documents">
-                                <iframe src="{!v.siteURL}" width="100%" height="600px" />
-                            </lightning:tab -->
+                    
+                    <aura:if isTrue="{!v.visitRec.Account__c != null}"> 
                         
+                        <!--TabOpportunities-->
                         <lightning:tab label="Opportunities">
                             <div class="dataTableMobile">
                                 <aura:iteration items="{!v.relOppList}"  var="val" indexVar="index">
@@ -545,6 +651,7 @@
                             </div>
                         </lightning:tab>
                         
+                        <!--TabSamples1-->
                         <lightning:tab label="Samples">
                             <div class="dataTableMobile">
                                 <aura:iteration items="{!v.relSampleList}"  var="val" indexVar="index">
@@ -561,6 +668,7 @@
                             </div>
                         </lightning:tab>
                         
+                        <!--TabProjects1-->
                         <lightning:tab label="Projects">
                             <div class="dataTableMobile">
                                 <aura:iteration items="{!v.relProjectList}"  var="val" indexVar="index">
@@ -578,6 +686,7 @@
                             </div>
                         </lightning:tab>
                         
+                        <!--TabInvoices1-->
                         <lightning:tab label="Invoices">
                             <div class="dataTableMobile">
                                 <aura:iteration items="{!v.relInvoicesList}"  var="val" indexVar="index">
@@ -596,6 +705,7 @@
                             </div>
                         </lightning:tab>
                         
+                        <!--TabTickets1-->
                         <lightning:tab label="Tickets">
                             <div class="dataTableMobile">
                                 <aura:iteration items="{!v.relCaseList}"  var="val" indexVar="index">
@@ -612,9 +722,11 @@
                                 </aura:iteration>
                             </div>
                         </lightning:tab>
+                        
                     </aura:if>
                     
                 </lightning:tabset>
+                
             </div>
         </div>
         
@@ -633,15 +745,8 @@
                                                           class="slds-modal__close"/>
                                 </div>
                                 <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-                                    <!-- <c:lWCComponent2 aura:id="lWCComponent2"></c:lWCComponent2>   -->
-                                    <!-- <c:createOpportunityOnAccount aura:id="createOpportunity" recordId="{!v.accID}" ></c:createOpportunityOnAccount> -->
-                                    <!-- <lightning:recordForm
-                                                      objectApiName="{!v.SobjectApiName}"
-                                                      fields="{!v.fields}"
-                                                      columns="2"
-                                                      oncancel="{!c.onCancel}"
-                                                      onsuccess="{!c.handleSuccess}" /> -->
                                     
+                                    <!--AddressPage-->
                                     <aura:if isTrue="{!v.showAddressPage}">
                                         <h3>Shipping Address</h3><br/>
                                         <div class="slds-scrollable_x">
@@ -661,9 +766,6 @@
                                                 <tbody>
                                                     <aura:iteration items="{!v.ship_addresses}" var="address" indexVar="index">
                                                         <tr key="{!address.id}">
-                                                            <!-- <td>
-                                                            <lightning:input type="checkbox" name="{!index}" value="{!address.id}" checked="{!address.checked}" onchange="{!c.onAddressSelect}" />
-                                                        </td> -->
                                                             <td>
                                                                 <input type="radio" id="{!address.id}" name="shippingOptions" checked="{!address.checked}" onclick="{!c.onAddressSelect}"  />
                                                             </td>
@@ -700,9 +802,6 @@
                                                 <tbody>
                                                     <aura:iteration items="{!v.bill_addresses}" var="address" indexVar="index">
                                                         <tr key="{!address.id}">
-                                                            <!-- <td>
-                                                            <lightning:input type="checkbox" data-index="{!index}" data-id="{!address.id}" checked="{!address.checked}" onchange="{!c.onBillAddressSelect}" />
-                                                        </td> -->
                                                             <td>
                                                                 <input type="radio" id="{!address.id}" name="billingOptions" checked="{!address.checked}" onclick="{!c.onBillAddressSelect}"  />
                                                             </td>
@@ -726,8 +825,8 @@
                                                 <lightning:button variant="brand" label="Next" class="slds-m-left_x-small" onclick="{!c.handleNavigate}" />
                                             </div>
                                         </div>
+                                        <!--CreateOpportunityPage-->
                                         <aura:set attribute="else">
-                                            <!-- <lightning:card> -->
                                             <div class="slds-border_bottom slds-align_absolute-center">
                                                 <h1 style="font-size:20px;">Create Opportunity</h1>
                                             </div><br/>
@@ -735,14 +834,12 @@
                                                                       objectApiName="Opportunity"
                                                                       onerror="{!c.handleError}"
                                                                       onsuccess="{!c.handleOppSuccess}" >
-                                                
                                                 <div class="slds-grid">
                                                     <div class ="slds-col slds-size_1-of-2">
                                                         <lightning:inputField fieldName="Name" value="{!v.visitRec.Account__r.Name + ' - Opportunity'}"/>
                                                         <lightning:inputField fieldName="Visit__c" value="{!v.visitRec.Id}"/>
                                                         <lightning:inputField fieldName="AccountId" value="{!v.visitRec.Account__c}"/>
                                                         <lightning:inputField fieldName="CloseDate"/>
-                                                        <!-- <lightning:inputField fieldName="RecordTypeId" aura:id="recType" disabled="true"/> -->
                                                         <lightning:inputField fieldName="StageName" value="New"/>
                                                         <lightning:inputField fieldName="End_Use_Category__c"/>
                                                         <lightning:inputField fieldName="End_Use_Application__c" />                
@@ -761,7 +858,6 @@
                                                         <lightning:inputField fieldName="Annual_Volume_in_units__c"/>
                                                         <lightning:inputField fieldName="Annual_Volume_Full__c" />                
                                                         <lightning:inputField fieldName="Target_Price_Kg__c" />
-                                                        <!-- <lightning:inputField fieldName="Actual_Annual_Potential_Value__c" />  -->
                                                         <lightning:inputField fieldName="Primary_Contact__c" value="{!v.visitRec.Account__r.Customer_Contact__c}"/>
                                                         <lightning:inputField fieldName="Customer_Followup_Date__c"/>
                                                         <lightning:inputField fieldName="Customer_response__c"/>
@@ -783,7 +879,6 @@
                                                     <lightning:button label="Save" variant="brand" onclick="{!c.handleOppSubmit}" class="slds-m-top_small" />
                                                 </div>  
                                             </lightning:recordEditForm> 
-                                            <!-- </lightning:card> -->
                                         </aura:set>
                                     </aura:if>               
                                     
@@ -792,6 +887,7 @@
                         </section>
                         <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>   
                     </aura:if>
+                    
                     <lightning:LayoutItem size="12" class="buttonCard">
                         <div class="buttonGroupCardDesktop">
                             <lightning:Layout>
@@ -800,10 +896,7 @@
                                         <lightning:button onclick="{!c.createCaseHanlde}" label="New Ticket" class="visitMainButtons"/>
                                         <lightning:button onclick="{!c.createOpportunityHandle}" label="New Opportunity" class="visitMainButtons"/>
                                     </aura:if>
-                                    <!-- <lightning:button label="Open Google Maps" onclick="{!c.openGoogleMaps}" class="visitMainButtons"/> -->
-                                    <!-- <lightning:button onclick="{!c.createLogCall}" label="Log a call" class="visitMainButtons"/> -->
-                                    <lightning:button onclick="{!c.createTaskHanlde}" label="Log an Activity" class="visitMainButtons"/>
-                                    <lightning:button onclick="{!c.createTaskForMOM}" label="Log MOM" class="visitMainButtons"/>
+                                    <lightning:button onclick="{!c.UpdateVisitDetails}" label="Update Visit" class="visitMainButtons"/>
                                     <lightning:button onclick="{!c.checkOutHandler}" label="Check-Out" disabled="{!v.ShowCheckOutButton}" class="visitMainButtons"/>
                                     <lightning:button onclick="{!c.checkInHandler}" label="Check-In" disabled="{!v.ShowCheckInButton}" class="visitMainButtons"/>
                                 </lightning:LayoutItem>
@@ -816,6 +909,7 @@
                     <div class="dataTableDesktop">
                         <lightning:LayoutItem size="12" class="">
                             <lightning:tabset>
+                                <!--TabActivity-->
                                 <lightning:tab label="Activity">
                                     <div class="slds-m-around--xx-small slds-scrollable">
                                         <div class="container-fluid">
@@ -880,6 +974,8 @@
                                         </div>
                                     </div>
                                 </lightning:tab>
+                                
+                                <!--TabPastVisits-->
                                 <lightning:tab label="Past Visits">
                                     <div class="slds-m-around--xx-small slds-scrollable">
                                         <div class="container-fluid">
@@ -953,12 +1049,8 @@
                                     </div>
                                 </lightning:tab>
                                 
-                                <aura:if isTrue="{!v.visitRec.Account__c != null}">
-                                    
-                                    <!-- lightning:tab label="Documents">
-                                <iframe src="{!v.siteURL}" width="100%" height="600px" />
-                            </lightning:tab -->
-                                    
+                                <aura:if isTrue="{!v.visitRec.Account__c != null}"> 
+                                    <!--TabOpportunities-->
                                     <lightning:tab label="Opportunities">
                                         <div class="slds-m-around--xx-small slds-scrollable">
                                             <div class="container-fluid">
@@ -980,12 +1072,6 @@
                                                             <th scope="col" title="Visit Duration" style="background-color:#6CA1E9;">
                                                                 <div class="slds-truncate">Source</div>
                                                             </th>
-                                                            <!--th scope="col" title="Visit Time" style="background-color:#6CA1E9;">
-                                                            <div class="slds-truncate">Visit Time</div>
-                                                        </th>
-                                                        <th scope="col" title="Visit Status" style="background-color:#6CA1E9;">
-                                                            <div class="slds-truncate">Visit Status</div>
-                                                        </th-->
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -1014,16 +1100,6 @@
                                                                         {!val.LeadSource}
                                                                     </div>
                                                                 </td>
-                                                                <!--td style="background-color:#F5F5F5;">
-                                                                <div>
-                                                                    {!pastVisitRec.Check_In_Time__c}
-                                                                </div>
-                                                            </td>
-                                                            <td style="background-color:#F5F5F5;">
-                                                                <div>
-                                                                    {!pastVisitRec.Visit_Status__c}
-                                                                </div>
-                                                            </td-->
                                                             </tr>
                                                         </aura:iteration>
                                                     </tbody>
@@ -1032,6 +1108,7 @@
                                         </div>
                                     </lightning:tab>
                                     
+                                    <!--TabSamples-->
                                     <lightning:tab label="Samples">
                                         <div class="slds-m-around--xx-small slds-scrollable">
                                             <div class="container-fluid">
@@ -1089,6 +1166,7 @@
                                         </div>
                                     </lightning:tab>
                                     
+                                    <!--TabProjects-->
                                     <lightning:tab label="Projects">
                                         <div class="slds-m-around--xx-small slds-scrollable">
                                             <div class="container-fluid">
@@ -1154,6 +1232,7 @@
                                         </div>
                                     </lightning:tab>
                                     
+                                    <!--TabInvoices-->
                                     <lightning:tab label="Invoices">
                                         <div class="slds-m-around--xx-small slds-scrollable">
                                             <div class="container-fluid">
@@ -1227,6 +1306,7 @@
                                         </div>
                                     </lightning:tab>
                                     
+                                    <!--TabTickets-->
                                     <lightning:tab label="Tickets">
                                         <div class="slds-m-around--xx-small slds-scrollable">
                                             <div class="container-fluid">
@@ -1251,9 +1331,6 @@
                                                             <th scope="col" title="Visit Time" style="background-color:#6CA1E9;">
                                                                 <div class="slds-truncate">Case Reason</div>
                                                             </th>
-                                                            <!--th scope="col" title="Visit Status" style="background-color:#6CA1E9;">
-                                                            <div class="slds-truncate">Invoice Date</div>
-                                                        </th-->
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -1287,11 +1364,6 @@
                                                                         {!val.Reason}
                                                                     </div>
                                                                 </td>
-                                                                <!--td style="background-color:#F5F5F5;">
-                                                                <div>
-                                                                    {!val.Invoice_Date__c}
-                                                                </div>
-                                                            </td-->
                                                             </tr>
                                                         </aura:iteration>
                                                     </tbody>
@@ -1305,6 +1377,7 @@
                             </lightning:tabset>
                         </lightning:LayoutItem>
                     </div>
+                    
                 </lightning:card>
             </div>
         </lightning:LayoutItem>
@@ -1319,7 +1392,7 @@
             </div>
         </lightning:LayoutItem>
         
-        
+        <!--CreateTaskPage-->
         <aura:if isTrue="{!v.showCreateTask}">
             <div>
                 <section role="dialog" tabindex="-1" aria-label="Meaningful description of the modal content" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
@@ -1362,7 +1435,7 @@
             </div>
         </aura:if>
         
-        
+        <!--CreateLogTaskPage-->
         <aura:if isTrue="{!v.showCreateCallLogTask}">
             <div>
                 <section role="dialog" tabindex="-1" aria-label="Meaningful description of the modal content" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
@@ -1392,37 +1465,9 @@
             </div>
         </aura:if>
         
+        <!--CaseCreatePage-->
         <aura:if isTrue="{!v.showCreateCase}">
             <div>
-                <!-- <section role="dialog" tabindex="-1" aria-label="Meaningful description of the modal content" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
-                    <div class="slds-modal__container" >
-                        <header class="slds-modal__header">
-                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.closeCaseHanlde}">
-                                <lightning:icon iconName="utility:close" size="small" variant="neutral"/>
-                                <span class="slds-assistive-text">Close</span>
-                            </button>
-                        </header>
-                        <center style="background: white;"><b>New Case</b></center>
-                        <div class="slds-modal__content slds-p-around_medium alignLeft" id="modal-content-id-1">
-                            <div class="row">
-                                <lightning:select aura:id="fieldCaseStatus" label="Status"  required="true" onchange="{!c.onChangeHandlerCaseStatus}" value="{!v.caseRec.Status}">
-                                    <option value="">-None-</option>
-                                    <aura:iteration items="{!v.CaseStatuspickValues}" var="val">
-                                        <option value="{!val}"> {!val}</option>
-                                    </aura:iteration>
-                                </lightning:select>
-                                <lightning:input name="taskSubject" label="Subject" required="true" value="{!v.caseRec.Subject}"/> 
-                                <lightning:input type="text" name="taskcomments" required="true" label="Description" value="{!v.caseRec.Description}"/>
-                            </div>
-                        </div>
-                        <footer class="slds-modal__footer">
-                            <div class="slds-align_absolute-center">
-                                <lightning:button label="Cancel" variant="destructive" class="slds-m-top-medium"   onclick="{!c.closeCaseHanlde}"/>
-                                <lightning:button label="Submit" variant="brand" class="slds-m-top-medium" onclick="{!c.createCaseHandle}"/>
-                            </div>                            
-                        </footer>
-                    </div>
-                </section> -->
                 <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open">
                     <div class="slds-modal__container">
                         <div class="slds-modal__header">
@@ -1440,7 +1485,6 @@
                                                       objectApiName="Case"
                                                       onerror="{!c.handleError}"
                                                       onsuccess="{!c.createCaseHandle}" >
-                                
                                 <div class="slds-grid">
                                     <div class="slds-col slds-size_2-of-2">
                                         <lightning:inputField fieldName="ContactId"/>
@@ -1467,20 +1511,11 @@
                         </div>
                     </div>
                 </section>
-                
-                
-                
                 <div class="slds-backdrop slds-backdrop_open"></div>
             </div>
         </aura:if>
         
-        <!--lightning:recordForm
-                objectApiName="Opportunity"
-                mode="edit"
-                columns="2"
-                onsubmit="{!c.handleSuccess}"
-            /-->
-        
+        <!--OpportunityCreatePage-->
         <aura:if isTrue="{!v.showOpportunityCreate}">
             <div>
                 <section role="dialog" tabindex="-1" aria-label="Meaningful description of the modal content" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
@@ -1495,14 +1530,12 @@
                         <div class="slds-modal__content slds-p-around_medium alignLeft" id="modal-content-id-1">
                             <div class="row">
                                 <lightning:input name="RequestName" label="Opportunity Name" required="true" value="{!v.oppRec.Name}"/> 
-                                <!--lightning:input name="oppName" label="Opportunity Name" required="true" value="{!v.oppRec.Name}"/--> 
                                 <lightning:select aura:id="fieldOppStage" label="Status"  required="true" onchange="{!c.onChangeHandlerOppStage}" value="{!v.oppRec.StageName}">
                                     <option value="">--None--</option>
                                     <aura:iteration items="{!v.OppStageNamepickValues}" var="val">
                                         <option value="{!val}"> {!val}</option>
                                     </aura:iteration>
                                 </lightning:select>
-                                
                                 <lightning:input type="date" name="oppclosedate" required="true" label="Close Date" value="{!v.oppRec.CloseDate}"/>
                             </div>
                         </div>
@@ -1511,49 +1544,102 @@
                                 <lightning:button label="Cancel" variant="destructive" class="slds-m-top--medium"   onclick="{!c.closeOpportunityHandle}"/>
                                 <lightning:button label="Submit" variant="brand" class="slds-m-top--medium" onclick="{!c.createOppHandle}"/>
                             </div>
-                            
                         </footer>
                     </div>
                 </section>
                 <div class="slds-backdrop slds-backdrop_open"></div>
             </div>
         </aura:if>
-        <!--/div-->
         
-        <aura:if isTrue="{!v.ShowLogMOM}">
+        <!--UpdateVisitPage-->
+        <aura:if isTrue="{!v.ShowUpdateVisitPage}">
             <div>
-                <section role="dialog" tabindex="-1" aria-label="Meaningful description of the modal content" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
-                    <div class="slds-modal__container  logMomMobile" >
+                <section role="dialog" tabindex="-1" aria-label="Meaningful description of the modal content" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
+                    <div class="slds-modal__container" >
                         <header class="slds-modal__header">
-                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.closeModelPop}">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.closeLeadModelPop}">
                                 <lightning:icon iconName="utility:close" size="small" variant="neutral"/>
                                 <span class="slds-assistive-text">Close</span>
                             </button>
                         </header>
-                        <center style="background: cornflowerblue;font-size: 20px;padding: 5px;"><b>Create Mom Activity</b></center>
-                        <div class="slds-modal__content slds-p-around_medium alignLeft" id="modal-content-id-1"> 
-                            <div class="row"> 
-                                
-                                <lightning:input type="text" aura:id="logSubject" label=" Subject" required="true" placeholder="Enter subject..." onchange="{!c.OnchageMomDescription}" />
-                                <lightning:input type="email" aura:id="logStackHolderEmail" label="Stakeholder Email"  required="true" placeholder="Enter email..." onchange="{!c.OnchageMomDescription}" />
-                                <div class="slds-no-flex slds-m-around_small">
-                                    <c:userlookup  onsendidtoaura="{!c.handleLWCEvent}"/>
+                        <center style="background: rgb(224, 166, 124);font-size: 20px;padding: 5px;"><b>Update Visit Details</b></center>
+                        <div class="slds-modal__content slds-p-around_medium alignLeft" id="modal-content-id-1">  
+                            <lightning:recordEditForm aura:id="recordLeadEditForm" 
+                                                      recordId="{!v.visitId}" 
+                                                      objectApiName="Visit__c"
+                                                      onerror="{!c.handleError}"
+                                                      onsuccess="{!c.handleUpdateVisit}" >
+                                <div class="slds-section slds-is-open">
+                                    <h3 class="slds-section__title"> 
+                                        <span class="slds-truncate slds-size_12-of-12" title="Section Title" style="Background-color:#F3F3F3;border-radius:0.25rem;padding:3px;"><b>Basic Details</b></span>
+                                    </h3>
                                 </div>
-                                <lightning:input type="text" aura:id="logDescription" label=" Mom Description" placeholder="Enter description..." onchange="{!c.OnchageMomDescription}" />
-                                <!-- <lightning:input aura:id="visitDescription" label="Visit Description" required="true"  value = "{!v.visitRec.Description__c}"/> -->
-                            </div>
+                                <div class="slds-grid slds-gutters">
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning:inputField fieldName="Name" aura:id="visitName"/> 
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning:inputField fieldName="Visit_Status__c" aura:id="visitStatus"/> 
+                                    </div>
+                                </div>
+                                <div class="slds-grid slds-gutters">
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning:inputField fieldName="Planned_visit_date__c" aura:id="plannedVisitDate"/> 
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning:inputField fieldName="Actual_visit_date__c" aura:id="actualVisitDate"/> 
+                                    </div>
+                                </div>
+                                <div class="slds-grid slds-gutters">
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning:inputField fieldName="Expected_Start_Time__c" aura:id="plannedVisitDate"/> 
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning:inputField fieldName="Expected_End_Time__c" aura:id="actualVisitDate"/> 
+                                    </div>
+                                </div>
+                                <div class="slds-grid slds-gutters">
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning:inputField fieldName="Specifier__c" aura:id="plannedVisitDate"/> 
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning:inputField fieldName="Description__c" aura:id="actualVisitDate"/> 
+                                    </div>
+                                </div>
+                                <div class="slds-section slds-is-open">
+                                    <h3 class="slds-section__title"> 
+                                        <span class="slds-truncate slds-size_12-of-12" title="Section Title" style="Background-color:#F3F3F3;border-radius:0.25rem;padding:3px;"><b>Address Details</b></span>
+                                    </h3>
+                                </div>
+                                <div class="slds-grid slds-gutters">
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning:inputField fieldName="Street__c" aura:id="visitName"/> 
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning:inputField fieldName="Postal_Code__c" aura:id="visitStatus"/> 
+                                    </div>
+                                </div>
+                                <div class="slds-grid slds-gutters">
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning:inputField fieldName="City__c" aura:id="visitName"/> 
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning:inputField fieldName="State__c" aura:id="visitStatus"/> 
+                                    </div>
+                                </div>
+                                <div class="slds-align_absolute-center slds-border_top" slot="footer">
+                                    <lightning:button label="Cancel" variant="destructive" onclick="{!c.onCancelVisitUpdatePage}" class="slds-m-top_small slds-m-right_small" />
+                                    <lightning:button label="Save Visit Details" variant="success" type="submit" class="slds-m-top_small" />
+                                </div> 
+                            </lightning:recordEditForm>
                         </div>
-                        
-                        <footer class="slds-modal__footer">
-                            <div class="slds-align_absolute-center">
-                                <lightning:button label="Cancel" class="slds-m-top--medium"   onclick="{!c.closeModelPop}"/>
-                                <lightning:button label="Submit" variant="brand" class="slds-m-top--medium" onclick="{!c.createMomActivity}"/>
-                            </div>
-                        </footer>
                     </div>
                 </section>
                 <div class="slds-backdrop slds-backdrop_open"></div>
             </div>
+            
         </aura:if>
+        
     </lightning:Layout>
+    
 </aura:component>

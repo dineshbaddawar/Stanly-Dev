@@ -4,11 +4,9 @@
         var helper = this;
         var today = new Date();
         var selectedDate = component.get('v.selectedDate');        
-        // Get the year, month, and day from the Date object
         var year = today.getFullYear();
         var month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
         var day = String(today.getDate()).padStart(2, '0');
-        
         // Format the date in "YYYY-MM-DD" format
         var formattedDate = year + '-' + month + '-' + day;
         if(selectedDate != null && selectedDate != undefined){
@@ -20,51 +18,60 @@
         action.setParams({
             visitDate :  formattedDate
         });
-        action.setCallback(this, function(response){ // AccountAddressList
+        action.setCallback(this, function(response){ 
             if(response.getState()==='SUCCESS'){
                 var result = response.getReturnValue();
                 var newVisitList;
                 if(result != null){
                     var isApprovalRequired = result.useApprovalProcess;
                     if(result.visitList != undefined && result.visitList != null && result.visitList != ''){
-                        //component.set('v.completedTaskList', result.completedVisitList); 
                         if(isApprovalRequired){
-                           if(result.isApproved == true){
-                            component.set('v.taskList', result.visitList);
-                            component.set('v.completedVisit', result.completedVisit); 
-                            component.set('v.pendingVisit', result.pendingVisit);
-                            component.set("v.ShowEmptyPage",false);
-                            component.set('v.disableVisitButtons', true);
-                            component.set("v.ShowStartDay",false);
-                            
-                            if(result.dvpList != undefined && result.dvpList.length != 0){
+                            if(result.isApproved == true){
+                                component.set('v.taskList', result.visitList);
+                                component.set('v.completedVisit', result.completedVisit); 
+                                component.set('v.pendingVisit', result.pendingVisit);
+                                component.set("v.ShowEmptyPage",false);
+                                component.set('v.disableVisitButtons', true);
                                 component.set("v.ShowStartDay",false);
-                                if(result.dvpList[0].End_Date__c == null){
-                                    component.set("v.ShowEndDay",false);
-                                    component.set("v.ShowStartDay",true);
-                                }else{
-                                    component.set("v.ShowEndDay",true);
-                                    component.set("v.ShowStartDay",true);
-                                }
-                                component.set('v.disableVisitButtons', false);
-                                const today = new Date();
-                                var checkDate = new Date(formattedDate);
-                                if(checkDate.setHours(0,0,0,0) != today.setHours(0,0,0,0)){
-                                    component.set("v.ShowStartDay",true);
-                                    component.set("v.ShowEndDay",true);
-                                    component.set('v.disableVisitButtons', true);
-                                }
-                            }else{
-                                const today = new Date();
-                                var checkDate = new Date(formattedDate);
-                                if(checkDate.setHours(0,0,0,0) == today.setHours(0,0,0,0)){
+                                
+                                if(result.dvpList != undefined && result.dvpList.length != 0){
                                     component.set("v.ShowStartDay",false);
+                                    if(result.dvpList[0].End_Date__c == null){
+                                        component.set("v.ShowEndDay",false);
+                                        component.set("v.ShowStartDay",true);
+                                    }else{
+                                        component.set("v.ShowEndDay",true);
+                                        component.set("v.ShowStartDay",true);
+                                    }
+                                    component.set('v.disableVisitButtons', false);
+                                    const today = new Date();
+                                    var checkDate = new Date(formattedDate);
+                                    if(checkDate.setHours(0,0,0,0) != today.setHours(0,0,0,0)){
+                                        component.set("v.ShowStartDay",true);
+                                        component.set("v.ShowEndDay",true);
+                                        component.set('v.disableVisitButtons', true);
+                                    }
                                 }else{
-                                    component.set("v.ShowStartDay",true);
+                                    const today = new Date();
+                                    var checkDate = new Date(formattedDate);
+                                    if(checkDate.setHours(0,0,0,0) == today.setHours(0,0,0,0)){
+                                        component.set("v.ShowStartDay",false);
+                                    }else{
+                                        component.set("v.ShowStartDay",true);
+                                        component.set("v.ShowEndDay",true);
+                                        component.set('v.disableVisitButtons', true);
+                                    }
                                     component.set("v.ShowEndDay",true);
                                     component.set('v.disableVisitButtons', true);
-                                }
-                                component.set("v.ShowEndDay",true);
+                                } 
+                            }
+                            else{
+                                component.set('v.taskList', result.visitList);
+                                component.set('v.completedVisit', result.completedVisit); 
+                                component.set('v.pendingVisit', result.pendingVisit);
+                                component.set("v.ShowEmptyPage",false);
+                                component.set("v.ShowStartDay",true);
+                                component.set("v.ShowEndDay",true)
                                 component.set('v.disableVisitButtons', true);
                             } 
                         }else{
@@ -72,18 +79,6 @@
                             component.set('v.completedVisit', result.completedVisit); 
                             component.set('v.pendingVisit', result.pendingVisit);
                             component.set("v.ShowEmptyPage",false);
-                            component.set("v.ShowStartDay",true);
-                            component.set("v.ShowEndDay",true)
-                            component.set('v.disableVisitButtons', true);
-                        } 
-                        }else{
-                            component.set('v.taskList', result.visitList);
-                            component.set('v.completedVisit', result.completedVisit); 
-                            component.set('v.pendingVisit', result.pendingVisit);
-                            component.set("v.ShowEmptyPage",false);
-                            //component.set("v.ShowStartDay",false);
-                            //component.set("v.ShowEndDay",true)
-                            //component.set('v.disableVisitButtons', true);
                             if(result.dvpList != undefined && result.dvpList.length != 0){
                                 component.set("v.ShowStartDay",false);
                                 if(result.dvpList[0].End_Date__c == null){
@@ -119,12 +114,14 @@
                         var accountAddressOBj = [];
                         var  location = {Street : '',City:'',State:'',PostalCode : '',Country : ''}
                         for(var i=0;i<result.visitList.length;i++){
-                            //var dataccc = result.visitList[i].Account__r;
                             if(result.visitList[i].Account__c != undefined && result.visitList[i].Account__c != null){
                                 var dataccc = result.visitList[i].Account__r;
-                            }else{
-                                var dataccc = result.visitList[i].Lead__r;
+                            }else if(result.visitList[i].Specifier__c != undefined){
+                                var dataccc = result.visitList[i].Specifier__r;
                             }
+                                else{
+                                    var dataccc = result.visitList[i].Lead__r;
+                                }
                             accountAddressOBj.push(dataccc);
                         }
                         component.set("v.AccountAddressList",accountAddressOBj);
@@ -133,23 +130,32 @@
                             var tempLocat = {};
                             var LocationObj = {};
                             
-                            if(dataAddress[i].BillingStreet != undefined && dataAddress[i].BillingStreet != null){
-                            tempLocat.Street = dataAddress[i].BillingStreet;
-                            tempLocat.City  = dataAddress[i].BillingCity;
-                            tempLocat.State = dataAddress[i].BillingState;
-                            tempLocat.PostalCode = dataAddress[i].BillingPostalCode;
-                            tempLocat.Country = dataAddress[i].BillingCountry;
-                            LocationObj.location = tempLocat;
-                            objlocation.push(LocationObj);
-                            }else{
-                                tempLocat.Street = dataAddress[i].Street;
-                                tempLocat.City  = dataAddress[i].City;
-                                tempLocat.State = dataAddress[i].StateCode;
-                                tempLocat.PostalCode = dataAddress[i].PostalCode;
-                                tempLocat.Country = dataAddress[i].CountryCode;
+                            if(dataAddress[i] !=undefined && dataAddress[i].BillingStreet != undefined && dataAddress[i].BillingStreet != null){
+                                tempLocat.Street = dataAddress[i].BillingStreet;
+                                tempLocat.City  = dataAddress[i].BillingCity;
+                                tempLocat.State = dataAddress[i].BillingState;
+                                tempLocat.PostalCode = dataAddress[i].BillingPostalCode;
+                                tempLocat.Country = dataAddress[i].BillingCountry;
+                                LocationObj.location = tempLocat;
+                                objlocation.push(LocationObj);
+                            }else if(dataAddress[i] == undefined){
+                                tempLocat.Street = '';
+                                tempLocat.City  = '';
+                                tempLocat.State = '';
+                                tempLocat.PostalCode = '';
+                                tempLocat.Country ='';
                                 LocationObj.location = tempLocat;
                                 objlocation.push(LocationObj);
                             }
+                                else{
+                                    tempLocat.Street = dataAddress[i].Street;
+                                    tempLocat.City  = dataAddress[i].City;
+                                    tempLocat.State = dataAddress[i].StateCode;
+                                    tempLocat.PostalCode = dataAddress[i].PostalCode;
+                                    tempLocat.Country = dataAddress[i].CountryCode;
+                                    LocationObj.location = tempLocat;
+                                    objlocation.push(LocationObj);
+                                }
                         }
                         component.set("v.AccountMapList",objlocation)
                         this.MapinitMethod(component, event, helper);
@@ -195,18 +201,13 @@
         component.set('v.selectedDate', formattedDate);
         var action = component.get("c.GetCompletedVisitRecords");
         action.setParams({ visitDate: formattedDate });
-        
         action.setCallback(this, function(response) {
-            var state = response.getState();
-            //alert('state', state);
-            if (state === "SUCCESS") {
+            if (response.getState() === "SUCCESS") {
                 var responseValue = response.getReturnValue();
-                //alert('responseValue', responseValue);
                 if (responseValue) {
                     var isApprovalRequired = responseValue.useApprovalProcess;
                     component.set("v.completedTaskList", responseValue.completedVisitList);
                     var result = responseValue;
-                    
                     if(result.dvpList != undefined && result.dvpList.length != 0){
                         component.set("v.ShowStartDay",false);
                         if(result.dvpList[0].End_Date__c == null){
@@ -238,6 +239,7 @@
         component.set('v.mapMarkers',component.get("v.AccountMapList") );
         component.set('v.zoomLevel', 12);
     },
+    
     showsuccessMessage : function (component, event, helper) {
         var toastEvent = $A.get("e.force:showToast");
         toastEvent.setParams({
@@ -276,7 +278,6 @@
             navigateToChildEvent.fire();
             $A.get('e.force:refreshView').fire(); 
         });
-        
         // Invoke the callback function after a slight delay
         setTimeout(reloadCallback, 1000);
     },
@@ -304,8 +305,7 @@
             visitRecList: taskrecords
         });
         action.setCallback(this, function (response) {
-            var state = response.getState();
-            if (state === "SUCCESS") {
+            if (response.getState() === "SUCCESS") {
                 var data = response.getReturnValue(); 
                 if (data != null) {
                     
@@ -319,45 +319,42 @@
                         mode: 'pester'
                     });
                     toastEvent.fire();
-                    
                     component.set("v.ShowStartDay",true);
                     component.set("v.ShowEndDay",false);
                     component.set('v.disableVisitButtons', false);
                 }
-            } else if (state === "ERROR") {
+            } else if (response.getState() === "ERROR") {
                 var errors = action.getError();
                 if (errors) {
                     if (errors[0] && errors[0].message) {
                         alert(errors[0].message);
                     }
                 }
-            } else if (state === "INCOMPLETE") {
+            } else if (response.getState() === "INCOMPLETE") {
                 alert('No response from server or client is offline.');
             }
         })
         $A.enqueueAction(action);
     },
-   
     
     handleVisitRecords : function (component, event, helper){
         debugger;
         var action = component.get("c.getTodayVisitRecordsListNew");
-    action.setCallback(this, function(response) {
-        var state = response.getState();
-        if (state === "SUCCESS") {
-            var result = response.getReturnValue();
-            var visitList = [];
-            for (var i = 0; i < result.length; i++) {
-                var visit = {
-                    id: result[i].Id,
-                    name: result[i].Name
-                };
-                visitList.push(visit);
+        action.setCallback(this, function(response) {
+            if (response.getState() === "SUCCESS") {
+                var result = response.getReturnValue();
+                var visitList = [];
+                for (var i = 0; i < result.length; i++) {
+                    var visit = {
+                        id: result[i].Id,
+                        name: result[i].Name
+                    };
+                    visitList.push(visit);
+                }
+                component.set("v.visitList", visitList);
             }
-            component.set("v.visitList", visitList);
-        }
-    });
-    $A.enqueueAction(action);
+        });
+        $A.enqueueAction(action);
     },
     
     EndVisitDayhelper : function (component, lat, long){
@@ -368,8 +365,7 @@
             endLong: long
         });
         action.setCallback(this,function(response){
-            var state = response.getState();
-            if(state === "SUCCESS"){
+            if(response.getState() === "SUCCESS"){
                 if(response.getReturnValue() !=null){
                     var toastEvent = $A.get("e.force:showToast");
                     toastEvent.setParams({
@@ -382,14 +378,14 @@
                     });
                     toastEvent.fire();
                 }
-            } else if(state === "ERROR"){
+            } else if(response.getState() === "ERROR"){
                 var errors = action.getError();
                 if (errors) {
                     if (errors[0] && errors[0].message) {
                         alert(errors[0].message);
                     }
                 }
-            }else if (status === "INCOMPLETE") {
+            }else if (response.getState() === "INCOMPLETE") {
                 alert('No response from server or client is offline.');
             }
         });       
@@ -408,6 +404,7 @@
         });
         toastEvent.fire();
     },
+    
     showSuccess : function(component, event, helper) {
         var toastEvent = $A.get("e.force:showToast");
         toastEvent.setParams({
@@ -420,6 +417,7 @@
         });
         toastEvent.fire();
     },
+    
     showError : function(component, event, helper) {
         var toastEvent = $A.get("e.force:showToast");
         toastEvent.setParams({
@@ -432,6 +430,7 @@
         });
         toastEvent.fire();
     },
+    
     showWarning : function(component, event, helper) {
         var toastEvent = $A.get("e.force:showToast");
         toastEvent.setParams({
@@ -444,7 +443,8 @@
         });
         toastEvent.fire();
     },
-     showErrorDynamic : function(component, event, helper, errorMessage) {
+    
+    showErrorDynamic : function(component, event, helper, errorMessage) {
         var toastEvent = $A.get("e.force:showToast");
         toastEvent.setParams({
             title : 'Error',
@@ -458,10 +458,8 @@
     },
     
     reloadPage: function(component, event, helper){
-        
         var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         var counter = component.get("v.nextCounter");
-        //component.set("v.nextCounter",counter);
         let curr = new Date();
         var date = new Date();
         date.setDate(date.getDate() + (7 * counter));
@@ -474,7 +472,6 @@
             let weekDate = new Date(curr.setDate(first)).toISOString().slice(0, 10);
             week.push(weekDate);
             const newDate = new Date(weekDate);
-            //newDate.setDate(weekDate.getDate() + i);
             var dateObj = {day:'', fullDate:'', month:''};
             dateObj.fullDate = newDate.toISOString().slice(0, 10);
             dateObj.day = newDate.toISOString().slice(8,10);
@@ -492,6 +489,7 @@
         var baseURL = baseURL + 'apex/MultipleGeolocationVF?id='+selectedVisitDateFromParentComp;
         component.set("v.siteURL",baseURL);
     },
+    
     callMapMethodFromController : function(component, dataFromCont, helper){
         debugger;
         var selectedVisitDateFromParentComp = dataFromCont;
@@ -500,7 +498,7 @@
         component.set("v.siteURL",baseURL);
     },
     
-     validateFields: function(component, auraId) {
+    validateFields: function(component, auraId) {
         debugger;
         var customerSuccessValue = component.find(auraId).get('v.value');
         if ($A.util.isEmpty(customerSuccessValue)) {
@@ -517,6 +515,5 @@
             return true;
         }
     }
-    
     
 })

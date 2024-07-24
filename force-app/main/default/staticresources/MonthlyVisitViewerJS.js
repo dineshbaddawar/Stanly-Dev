@@ -11,13 +11,15 @@ $(document).ready(function () {
     let SelectedRecord;
     let selectedUserId;
     let visiteDateToApex;
-    let Leadgeolatitude;
-    let Leadgeolongitude;
-    let AccountLatitude;
-    let AccountLongitude;
+    // let Leadgeolatitude;
+    // let Leadgeolongitude;
+    // let AccountLatitude;
+    // let AccountLongitude;
+
     let AccountId;
     let LeadId;
-    let dateTime;
+    let SpecRecId;
+    // let dateTime;
     let addlat;
     let addlong;
     let startTime;
@@ -26,6 +28,11 @@ $(document).ready(function () {
     let routeName;
     let objecTypeName;
     let tagRSM = false;
+    var plannedVisitDate;
+    var VisitDescription;
+    var visitStartTime;
+    var visitEndTime;
+    
     
     let configureCalendar = function () {
         debugger;
@@ -39,7 +46,6 @@ $(document).ready(function () {
 
     MonthlyVisitViewerController.getcurrentUserRoutesNew(function (result, event) {
         debugger;
-        console.log('--- result Object :' + result);
         $(result).each(function (i, e) {
             $("#pick-two").after('<option value="' + result[i] + '">' + result[i] + '</option>');
         });
@@ -67,19 +73,23 @@ $(document).ready(function () {
           
         }
         if(eventss!=null){
-            eventss.forEach(item=>{
-                
-                if(item.Account__c == undefined || item.Account__c == null){
-                repVisits.push({ id: item.Id, start: item.Actual_visit_date__c,title:item.Lead__r.Name, kpiId:item.KPI_Target__c, eventColor:'purple', status:item.Visit_Status__c, Name:item.Name, RouteName:item.Route_Name__c, visitDate:item.Planned_visit_date__c, desc:item.Description__c, kpiName: item.KPI_Target_Name__c, duration:item.Duration__c });
+           eventss.forEach(item=>{
+        if(item.Lead__c != undefined || item.Lead__c != null){
+           repVisits.push({ id: item.Id, start: item.Actual_visit_date__c,title:item.Lead__r.Name, kpiId:item.KPI_Target__c, eventColor:'purple', status:item.Visit_Status__c, Name:item.Name, RouteName:item.Route_Name__c, visitDate:item.Planned_visit_date__c, desc:item.Description__c, kpiName: item.KPI_Target_Name__c, duration:item.Duration__c});
         }
-        else{
-            repVisits.push({ id: item.Id, start: item.Actual_visit_date__c,title:item.Account__r.Name, kpiId:item.KPI_Target__c, eventColor:'purple', status:item.Visit_Status__c, Name:item.Name, RouteName:item.Route_Name__c, visitDate:item.Planned_visit_date__c, desc:item.Description__c, kpiName: item.KPI_Target_Name__c, duration:item.Duration__c });
+        else if(item.Account__c != undefined || item.Account__c != null){
+            repVisits.push({ id: item.Id, start: item.Actual_visit_date__c,title:item.Account__r.Name, kpiId:item.KPI_Target__c, eventColor:'purple', status:item.Visit_Status__c, Name:item.Name, RouteName:item.Route_Name__c, visitDate:item.Planned_visit_date__c, desc:item.Description__c, kpiName: item.KPI_Target_Name__c, duration:item.Duration__c});
+        }else if(item.Specifier__c != undefined || item.Specifier__c != null){
+            repVisits.push({ id: item.Id, start: item.Actual_visit_date__c,title:item.Specifier__r.Name, kpiId:item.KPI_Target__c, eventColor:'purple', status:item.Visit_Status__c, Name:item.Name, RouteName:item.Route_Name__c, visitDate:item.Planned_visit_date__c, desc:item.Description__c, kpiName: item.KPI_Target_Name__c, duration:item.Duration__c});
+        }
+        else{ 
+            repVisits.push({ id: '', start: '',title:'', kpiId:'', eventColor:'purple', status:'', Name:'', RouteName:'', visitDate:'', desc:'', kpiName: '', duration:''});
         } 
-    })
-}
+       })
+    }
                   
                   
-                  if (event.status) {
+    if (event.status) {
     $('#calendar').fullCalendar({
         header: {
             left: 'prev,next today',
@@ -163,8 +173,8 @@ $(document).ready(function () {
         }
     });
     $('#calendar').fullCalendar('gotoDate', monthName);
-}
-$("#spinner").hide();
+    }
+    $("#spinner").hide();
     }, { escape: false });
 
     function updateSingleVisitDate(visit){ 
@@ -569,17 +579,28 @@ $("#spinner").hide();
             if(result!=null){
                 repVisits = [];
                 result.forEach(item=>{
-                    if(item.Account__c == undefined || item.Account__c == null){
-                        repVisits.push({ id: item.Id, start: item.Actual_visit_date__c,title:item.Lead__r.Name, kpiId:item.KPI_Target__c, eventColor:'purple', status:item.Visit_Status__c, Name:item.Name, RouteName:item.Route_Name__c, visitDate:item.Planned_visit_date__c, desc:item.Description__c, kpiName: item.KPI_Target_Name__c, duration:item.Duration__c });
-                    }
-                    else{
-                        repVisits.push({ id: item.Id, start: item.Actual_visit_date__c,title:item.Account__r.Name, kpiId:item.KPI_Target__c, eventColor:'purple', status:item.Visit_Status__c, Name:item.Name, RouteName:item.Route_Name__c, visitDate:item.Planned_visit_date__c, desc:item.Description__c, kpiName: item.KPI_Target_Name__c, duration:item.Duration__c });
-                    }
+
+                    // if(item.Account__c == undefined || item.Account__c == null){
+                    //     repVisits.push({ id: item.Id, start: item.Actual_visit_date__c,title:item.Lead__r.Name, kpiId:item.KPI_Target__c, eventColor:'purple', status:item.Visit_Status__c, Name:item.Name, RouteName:item.Route_Name__c, visitDate:item.Planned_visit_date__c, desc:item.Description__c, kpiName: item.KPI_Target_Name__c, duration:item.Duration__c });
+                    // }
+                    // else{
+                    //     repVisits.push({ id: item.Id, start: item.Actual_visit_date__c,title:item.Account__r.Name, kpiId:item.KPI_Target__c, eventColor:'purple', status:item.Visit_Status__c, Name:item.Name, RouteName:item.Route_Name__c, visitDate:item.Planned_visit_date__c, desc:item.Description__c, kpiName: item.KPI_Target_Name__c, duration:item.Duration__c });
+                    // }
+                    if(item.Lead__c != undefined || item.Lead__c != null){
+                        repVisits.push({ id: item.Id, start: item.Actual_visit_date__c,title:item.Lead__r.Name, kpiId:item.KPI_Target__c, eventColor:'purple', status:item.Visit_Status__c, Name:item.Name, RouteName:item.Route_Name__c, visitDate:item.Planned_visit_date__c, desc:item.Description__c, kpiName: item.KPI_Target_Name__c, duration:item.Duration__c});
+                     }
+                     else if(item.Account__c != undefined || item.Account__c != null){
+                        repVisits.push({ id: item.Id, start: item.Actual_visit_date__c,title:item.Account__r.Name, kpiId:item.KPI_Target__c, eventColor:'purple', status:item.Visit_Status__c, Name:item.Name, RouteName:item.Route_Name__c, visitDate:item.Planned_visit_date__c, desc:item.Description__c, kpiName: item.KPI_Target_Name__c, duration:item.Duration__c});
+                     }else if(item.Specifier__c != undefined || item.Specifier__c != null){
+                        repVisits.push({ id: item.Id, start: item.Actual_visit_date__c,title:item.Specifier__r.Name, kpiId:item.KPI_Target__c, eventColor:'purple', status:item.Visit_Status__c, Name:item.Name, RouteName:item.Route_Name__c, visitDate:item.Planned_visit_date__c, desc:item.Description__c, kpiName: item.KPI_Target_Name__c, duration:item.Duration__c});
+                     }
+                     else{ 
+                        repVisits.push({ id: '', start: '',title:'', kpiId:'', eventColor:'purple', status:'', Name:'', RouteName:'', visitDate:'', desc:'', kpiName: '', duration:''});
+                     } 
                 })
              }
         })
-      }
-
+    }
 
     function setEventDraggable() {
         /* initialize the external events
@@ -840,11 +861,44 @@ $("#spinner").hide();
     // For Creating Visit Record
     $("#save-visitrecord").click(function () {
         debugger;
-        var plannedVisitDate = $('#date-input-id-11').val();
-        var VisitDescription = $('#date-input-id-22').val();
-        var visitStartTime = $('#date-input-id-33').val();
-        var visitEndTime = $('#date-input-id-44').val();
+         plannedVisitDate = $('#date-input-id-11').val();
+         VisitDescription = $('#date-input-id-22').val();
+         visitStartTime = $('#date-input-id-33').val();
+         visitEndTime = $('#date-input-id-44').val();
+         SpecRecId = $(selectedInstance).attr("data-accid");
+         $('#specifieraddress-modal').hide();
+         callVisitSpecifierCreateMethod(SpecRecId,plannedVisitDate,visitStartTime,visitEndTime,VisitDescription);
     });
+
+
+    function callVisitSpecifierCreateMethod() {
+        debugger;
+        $("#spinner").show();
+        MonthlyVisitViewerController.createVisitForSpecifier(SpecRecId, plannedVisitDate, visitStartTime, visitEndTime, VisitDescription,function (result, event) {
+            if(result!=null){
+                $("#spinner").hide();
+                    swal({
+                        title: "Good job!",
+                        text: 'Visit Created Successfully!',
+                        icon: 'success',
+                        buttons: false,
+                        timer: 3000,
+                    });
+                    setTimeout(function(){
+                        window.location.reload();
+                        window.parent.postMessage({name:'Visit Created', payload:'fired'}, '*'); 
+                    },3000);   
+            }else{
+                swal ({
+                    title:"Oops" ,  
+                    text:"Something went wrong!" ,  
+                    icon:"error",
+                    buttons: false,
+                    timer: 1000,
+                })
+            }
+        }, { escape: false });
+    }
 
 });
 

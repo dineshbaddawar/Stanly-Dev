@@ -1,22 +1,20 @@
 global class StartVisitController {
+    
     public  string accId {get;set;}
     public  string visitId {get;set;}
     public string accDetails{get;set;}
     public String userId{get;set;}
     public String visitRecord{get;set;}
-
-    
     public String userName {get;set;}
-    
     public Static visit__c visitLookup{get;set;}
+    
     public class visitDetailWrapper{
-        //public Payment__c paymentRec;
         public String accId;
         public Case caseRec;
         public String userId;
-        //public Return__c returnRec;
         public List<orderitem> orderLineItem;
     }
+    
     global StartVisitController(){
         accId = apexpages.currentpage().getparameters().get('id');
         visitId = apexpages.currentpage().getparameters().get('vistId');
@@ -27,7 +25,7 @@ global class StartVisitController {
         getDealerDetails(accId);
         getVisitRecord(visitId);
     }
-
+    
     global void getVisitRecord(String vstId){
         Visit__c visit = [Select Id, City__c, Country__c, State__c, Street__c, Postal_Code__c, Geo_Location__latitude__s, Geo_Location__longitude__s, Name,CheckIn__c,Check_Out__c,Visit_Plan__c,Planned_visit_date__c,Actual_visit_date__c,Status__c From Visit__c Where Id=:vstId];
         visitRecord = JSON.serialize(visit);
@@ -68,10 +66,6 @@ global class StartVisitController {
     
     @RemoteAction
     global static String checkOutDealerShop(Decimal checkoutLat,Decimal checkoutLang,String vstId,String accId){
-        /*Location loc1 = Location.newInstance(12.8576,77.7864);
-Location loc2 = Location.newInstance(12.8576,77.7866);
-Double dist = Location.getDistance(loc1, loc2, 'km');*/
-        
         try{
             Visit__c vstRec = new Visit__c();
             vstRec.Check_Out__Latitude__s = checkoutLat;
@@ -85,25 +79,6 @@ Double dist = Location.getDistance(loc1, loc2, 'km');*/
             RETURN 'Something went wrong.';
         }
     }
-    
-    /*@RemoteAction
-    global static String createPaymentRecord(String visitWrapInstanceString){
-        
-        system.debug('visitWrapInstance::'+visitWrapInstanceString);
-        visitDetailWrapper visitWrapInstance = new visitDetailWrapper();
-        try{
-            visitWrapInstance = (visitDetailWrapper)System.JSON.deserialize(visitWrapInstanceString, visitDetailWrapper.class);
-            system.debug('visitWrapInstance::+'+visitWrapInstance);
-            Payment__c payment = visitWrapInstance.paymentRec;
-            payment.Account__c = visitWrapInstance.accId;
-            INSERT payment;
-            RETURN 'Your payment record has been Created';
-        }catch(Exception e){
-            system.debug('Exception::'+e.getStackTraceString());
-            RETURN 'Something went wrong';
-        }
-        
-    }*/
     
     @RemoteAction
     global static List<Product2> getChannelSalesProducts(){
@@ -128,34 +103,6 @@ Double dist = Location.getDistance(loc1, loc2, 'km');*/
             RETURN 'SOmething went wrong.';
         }
     }
-    
-    /*@RemoteAction
-    global Static String raiseReturnRequest(String visitWrapInstanceString){
-        visitDetailWrapper visitWrapInstance = new visitDetailWrapper();
-        try{
-            visitWrapInstance = (visitDetailWrapper)System.JSON.deserialize(visitWrapInstanceString, visitDetailWrapper.class);
-            Return__c returnRec = visitWrapInstance.returnRec;
-            INSERT returnRec;
-            
-            if(!visitWrapInstance.orderLineItem.isEmpty()){
-                
-                for(orderitem orderItemRec : visitWrapInstance.orderLineItem){
-                    
-                    orderItemRec.Order_Return__c = returnRec.Id;
-                }
-                
-                UPDATE visitWrapInstance.orderLineItem;
-            }
-            String returnOrder = [SELECT id,Name FROM Return__c WHERE id =:returnRec.Id].Name;
-            RETURN returnOrder;
-        }catch(Exception e){
-            System.debug('Exception trace::'+e.getStackTraceString());
-            System.debug(e.getLineNumber());
-            System.debug(e.getMessage());
-            System.debug(e.getCause());
-            RETURN 'Something went wrong.';
-        }
-    }*/
     
     @RemoteAction
     global static List<Orderitem> getOrderItems(String orderNumber){
@@ -193,6 +140,7 @@ Double dist = Location.getDistance(loc1, loc2, 'km');*/
         }
         
     }
+    
     @RemoteAction
     global static String createNewvisit(String accId,string planDate,String userId){
         visit__c vstRec = new visit__c();
@@ -201,7 +149,6 @@ Double dist = Location.getDistance(loc1, loc2, 'km');*/
         vstRec.Assigned_User__c = userId;
         system.debug('vstRec::'+vstRec);
         INSERT vstRec;
-        
         RETURN 'New visit has been created succesfully.';
     }
 }
