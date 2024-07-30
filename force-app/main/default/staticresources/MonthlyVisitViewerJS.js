@@ -11,15 +11,9 @@ $(document).ready(function () {
     let SelectedRecord;
     let selectedUserId;
     let visiteDateToApex;
-    // let Leadgeolatitude;
-    // let Leadgeolongitude;
-    // let AccountLatitude;
-    // let AccountLongitude;
-
     let AccountId;
     let LeadId;
     let SpecRecId;
-    // let dateTime;
     let addlat;
     let addlong;
     let startTime;
@@ -229,7 +223,6 @@ $(document).ready(function () {
         MonthlyVisitViewerController.createVisitObjectTypev1(LeadId, apexDate, addlat, addlong, startTime,endTime,tagRSM,function (result, event) {
             if(result!=null){
                 if(result == 'visit is already scheduled for this slot!!'){
-                    alert(result);
                     return;
                 }else{
                     swal({
@@ -579,13 +572,6 @@ $(document).ready(function () {
             if(result!=null){
                 repVisits = [];
                 result.forEach(item=>{
-
-                    // if(item.Account__c == undefined || item.Account__c == null){
-                    //     repVisits.push({ id: item.Id, start: item.Actual_visit_date__c,title:item.Lead__r.Name, kpiId:item.KPI_Target__c, eventColor:'purple', status:item.Visit_Status__c, Name:item.Name, RouteName:item.Route_Name__c, visitDate:item.Planned_visit_date__c, desc:item.Description__c, kpiName: item.KPI_Target_Name__c, duration:item.Duration__c });
-                    // }
-                    // else{
-                    //     repVisits.push({ id: item.Id, start: item.Actual_visit_date__c,title:item.Account__r.Name, kpiId:item.KPI_Target__c, eventColor:'purple', status:item.Visit_Status__c, Name:item.Name, RouteName:item.Route_Name__c, visitDate:item.Planned_visit_date__c, desc:item.Description__c, kpiName: item.KPI_Target_Name__c, duration:item.Duration__c });
-                    // }
                     if(item.Lead__c != undefined || item.Lead__c != null){
                         repVisits.push({ id: item.Id, start: item.Actual_visit_date__c,title:item.Lead__r.Name, kpiId:item.KPI_Target__c, eventColor:'purple', status:item.Visit_Status__c, Name:item.Name, RouteName:item.Route_Name__c, visitDate:item.Planned_visit_date__c, desc:item.Description__c, kpiName: item.KPI_Target_Name__c, duration:item.Duration__c});
                      }

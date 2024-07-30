@@ -1,22 +1,22 @@
 public without sharing class TodayTaskAuraController {
     
-    @AuraEnabled
-    public static void createVisitActivity(Id opportunityId, Id visitId) {
-        if (opportunityId != null && visitId != null) {
-            Visit_Activity__c visitActivity = new Visit_Activity__c();
-            visitActivity.Opportunity__c = opportunityId;
-            visitActivity.Visit__c = visitId;
-            try {
-                insert visitActivity;
-                System.debug('Visit_Activity__c record created successfully.');
-            } catch (Exception e) {
-                System.debug('Error creating Visit_Activity__c record: ' + e.getMessage());
-                ExceptionHelper.createExceptionLog(e);
-            }
-        } else {
-            System.debug('Opportunity Id and/or Visit Id is null. Visit_Activity__c record not created.');
-        }
-    }
+    // @AuraEnabled
+    // public static void createVisitActivity(Id opportunityId, Id visitId) {
+    //     if (opportunityId != null && visitId != null) {
+    //         Visit_Activity__c visitActivity = new Visit_Activity__c();
+    //         visitActivity.Opportunity__c = opportunityId;
+    //         visitActivity.Visit__c = visitId;
+    //         try {
+    //             insert visitActivity;
+    //             System.debug('Visit_Activity__c record created successfully.');
+    //         } catch (Exception e) {
+    //             System.debug('Error creating Visit_Activity__c record: ' + e.getMessage());
+    //             ExceptionHelper.createExceptionLog(e);
+    //         }
+    //     } else {
+    //         System.debug('Opportunity Id and/or Visit Id is null. Visit_Activity__c record not created.');
+    //     }
+    // }
     
     //method to create a visit record on field visit lead creation
     @AuraEnabled
@@ -218,12 +218,14 @@ public without sharing class TodayTaskAuraController {
         Visit__c visitRec = new Visit__c();
         try{
             if(String.isNotBlank(visitId)){
-                visitRec = [SELECT Id, Name, Status__c, Lead__c, Account__c, Duration__c, Lead__r.Name, Lead__r.Website, Lead__r.Email, Lead__r.Phone, Account__r.Name, Account__r.Website, Account__r.Email__c, Account__r.Phone,  Account__r.Customer_Contact__c, Lead__r.Street, Lead__r.City, Lead__r.State,Lead__r.PostalCode,Lead__r.Country,
+                visitRec = [SELECT Id, Name, Status__c,Visit_Status__c, Lead__c, Account__c, Duration__c, Lead__r.Name, Lead__r.Website, Lead__r.Email, Lead__r.Phone, Account__r.Name, Account__r.Website, Account__r.Email__c, Account__r.Phone,  Account__r.Customer_Contact__c, Lead__r.Street, Lead__r.City, Lead__r.State,Lead__r.PostalCode,Lead__r.Country,
                             Specifier__c,Specifier__r.Name,Specifier__r.Email,Specifier__r.Phone,Specifier__r.Street_Address__c,Specifier__r.City_Address__c,Specifier__r.Zip_Postal_Code__c,Specifier__r.State_Province__c,Specifier__r.Country__c,Street__c,City__c,Postal_Code__c,State__c,Country__c,
-                            CheckIn__Latitude__s, Check_Out__Latitude__s, Visit_Time__c,Expected_Start_Time__c, Planned_visit_date__c, Weekly_Beat_Plan__c, KPI_Target__c, KPI_Target__r.KPI_Target_Name__c,Account__r.BillingStreet, Account__r.BillingCity, Account__r.BillingState,Account__r.BillingPostalCode,Account__r.BillingCountry FROM Visit__c WHERE Id=:visitId LIMIT 1];
+                            CheckIn__Latitude__s, Check_Out__Latitude__s, Visit_Time__c,Expected_Start_Time__c,Expected_End_Time__c,Description__c,Actual_visit_date__c, Planned_visit_date__c, Weekly_Beat_Plan__c, KPI_Target__c, KPI_Target__r.KPI_Target_Name__c,Account__r.BillingStreet, Account__r.BillingCity, Account__r.BillingState,Account__r.BillingPostalCode,Account__r.BillingCountry FROM Visit__c WHERE Id=:visitId LIMIT 1];
                 if(visitRec !=null){
-                    System.debug('visitRec === >'+visitRec);
+                    System.debug('visitRec getSelectedVisitDetails === >'+visitRec);
                     return visitRec;
+                }else{
+                    return null;
                 }
             }
         }catch(Exception e){
@@ -456,13 +458,14 @@ public without sharing class TodayTaskAuraController {
         System.debug('visRec--> ' + visRec);
         try{
             if(String.isNotBlank(checkOutLat) && String.isNotBlank(checkOutLong)){
-                location visitCheckOut = location.newInstance(Decimal.valueOf(checkOutLat),Decimal.valueOf(checkOutLong));
+               // location visitCheckOut = location.newInstance(Decimal.valueOf(checkOutLat),Decimal.valueOf(checkOutLong));
                 Day_Visit_Plan__c updateLocationDis=[SELECT id,Name,Start_Location__c,End_Location__c from Day_Visit_Plan__c WHERE id=:visRec.Visit_Plan__c ];
                 visRec.Check_Out__Latitude__s = Decimal.valueOf(checkOutLat);
                 visRec.Check_Out__Longitude__s =  Decimal.valueOf(checkOutLong);
                 visRec.Visit_Status__c = 'COMPLETED';
                 visRec.Check_Out_Time__c = System.now();
-                visRec.Distance_Km__c=Location.getDistance(updateLocationDis.Start_Location__c, visitCheckOut, 'km');
+               // visRec.Distance_Km__c=Location.getDistance(updateLocationDis.Start_Location__c, visitCheckOut, 'km') != null ? Location.getDistance(updateLocationDis.Start_Location__c, visitCheckOut, 'km') : null;
+               // Location.getDistance(updateLocationDis.Start_Location__c, visitCheckOut, 'km');
                 update visRec;
                  System.debug('Check Out Visit Update Record === >'+visRec);
                 
@@ -1053,4 +1056,103 @@ public without sharing class TodayTaskAuraController {
         }
     }
     
+    // ============================================================================================================================================================================================================
+    @AuraEnabled
+    public Static List<String> getPickListValuesMethod(String ObjectApi_name, String Field_Name){
+        try{
+            List<String> lstPickvals                        = new List<String>();
+            Schema.SObjectType targetType                   = Schema.getGlobalDescribe().get(ObjectApi_name);
+            Sobject Object_name                             = targetType.newSObject();
+            Schema.sObjectType sobject_type                 = Object_name.getSObjectType(); 
+            Schema.DescribeSObjectResult sobject_describe   = sobject_type.getDescribe();
+            Map<String, Schema.SObjectField> field_map      = sobject_describe.fields.getMap();
+            List<Schema.PicklistEntry> pick_list_values     = field_map.get(Field_Name).getDescribe().getPickListValues();
+            
+            for (Schema.PicklistEntry a : pick_list_values) {
+                lstPickvals.add(String.ValueOf(a.getLabel()).trim());  
+            }
+            System.debug('lstPickvals>>>> ::'+lstPickvals);
+            return lstPickvals;
+        }Catch(Exception e){
+            System.debug('The Error ::'+e.getMessage() +' AND Error Line No :'+e.getLineNumber());
+        }
+        return null;
+    }
+    
+    // Coede to Make Standard Funcationlity into Custom - Dinesh
+    // GetVisitRecord For Update
+    @AuraEnabled 
+    public static visit__c updateVisitDetails(String VisitStringToUpdatedata){
+        System.debug('VisitStringToUpdatedata JSON === >'+VisitStringToUpdatedata);
+        try{
+        Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(VisitStringToUpdatedata);
+        Visit__c visitRecUpdate = new Visit__c();
+        visitRecUpdate.Id = (String) jsonMap.get('Id') ?? null;
+        if((String) jsonMap.get('Visit_Status__c') !=null && (String) jsonMap.get('Visit_Status__c') != ''){
+            visitRecUpdate.Visit_Status__c = (String) jsonMap.get('Visit_Status__c');
+        }
+        visitRecUpdate.Specifier__c = (String) jsonMap.get('Specifier__c') ?? '';
+        visitRecUpdate.Street__c = (String) jsonMap.get('Street__c') ?? '';
+        visitRecUpdate.City__c = (String) jsonMap.get('City__c') ?? '';
+        visitRecUpdate.Postal_Code__c = (String) jsonMap.get('Postal_Code__c') ?? '';
+        visitRecUpdate.State__c = (String) jsonMap.get('State__c') ?? '';
+        visitRecUpdate.Country__c = (String) jsonMap.get('Country__c') ?? '';
+        visitRecUpdate.Description__c = (String) jsonMap.get('Description__c') ?? '';
+        visitRecUpdate.Planned_visit_date__c = Date.valueOf((String) jsonMap.get('Planned_visit_date__c') ?? Date.today().format());
+        if((String) jsonMap.get('Actual_visit_date__c') !=null & (String) jsonMap.get('Actual_visit_date__c')  !=''){
+            System.debug('Yes');
+            visitRecUpdate.Actual_visit_date__c = Date.valueOf((String) jsonMap.get('Actual_visit_date__c') ?? Date.today().format());
+        }
+        String StartTime = (String) jsonMap.get('Expected_Start_Time__c');
+        String[] strStartTimeTimeSplit = StartTime.split(':');
+        visitRecUpdate.Expected_Start_Time__c=Time.newInstance(Integer.valueOf(strStartTimeTimeSplit[0]),Integer.valueOf(strStartTimeTimeSplit[1]),0 ,0);
+        String EndTime = (String) jsonMap.get('Expected_End_Time__c');
+        String[] EndTimeTimeSplit = EndTime.split(':');
+        visitRecUpdate.Expected_End_Time__c=Time.newInstance(Integer.valueOf(EndTimeTimeSplit[0]),Integer.valueOf(EndTimeTimeSplit[1]),0 ,0);
+
+        update visitRecUpdate;
+        if(visitRecUpdate !=null){
+            System.debug('visitRecUpdate Updated === >'+visitRecUpdate);
+            return visitRecUpdate;
+        }else{
+            return null;
+        }
+            }catch(Exception e){
+                System.debug('The Error ::'+e.getMessage() +' AND Error Line No :'+e.getLineNumber());
+            }
+        return null;
+    }
+
+    // Controller to Create New Lead Record
+    @AuraEnabled 
+    public static Lead specifierNewLeadRecord(Lead LeadRec){
+        System.debug('LeadRec === >'+LeadRec);
+        try{
+            insert LeadRec;
+            System.debug('Specifier Related New LeadRec === >'+LeadRec);
+            if(LeadRec !=null){
+                return LeadRec;
+            }
+        }catch(Exception e){
+            System.debug('The Error ::'+e.getMessage() +' AND Error Line No :'+e.getLineNumber());
+        }
+        return null;
+    }
+
+    // Method for Creating Child Viist Record
+    @AuraEnabled 
+    public static visit__c createChildVisitRecord(visit__c childvisitRec){
+        System.debug('childvisitRec == >'+childvisitRec);
+        try{
+            insert childvisitRec;
+            System.debug('Child Visit Record === >'+childvisitRec);
+            if(childvisitRec !=null){
+                return childvisitRec;
+            }
+        }catch(Exception e){
+            System.debug('The Error ::'+e.getMessage() +' AND Error Line No :'+e.getLineNumber());
+        }
+        return null;
+    }
+   
 }

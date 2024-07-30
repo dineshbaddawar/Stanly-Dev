@@ -12,6 +12,9 @@
         action.setCallback(this, function(response){
             if(response.getState()==='SUCCESS'){
                 var result = response.getReturnValue();
+                if(result !=null){
+                    component.set("v.ParentVisitName",result.Name);
+                }
                 // Added code by Dinesh - To Get Proper Time Format
                 if( result.Expected_Start_Time__c != undefined){
                     let milliseconds = result.Expected_Start_Time__c;
@@ -30,7 +33,25 @@
                     console.log('Start Time == >'+timeString); 
                     result.Expected_Start_Time__c = timeString;
                 }
+                if( result.Expected_End_Time__c != undefined){
+                    let milliseconds = result.Expected_End_Time__c;
+                    let date = new Date(0);
+                    date.setMilliseconds(milliseconds);
+                    // Extract hours, minutes, and seconds
+                    let hours = date.getUTCHours();
+                    let minutes = date.getUTCMinutes();
+                    let seconds = date.getUTCSeconds();
+                    // Format the time in 12-hour format
+                    let ampm = hours >= 12 ? 'PM' : 'AM';
+                    hours = hours % 12;
+                    hours = hours ? hours : 12; // the hour '0' should be '12'
+                    // Format the time as a string
+                    let timeString = hours + ':' + ('0' + minutes).slice(-2) + ':' + ('0' + seconds).slice(-2) + ' ' + ampm;
+                    console.log('Start Time == >'+timeString); 
+                    result.Expected_End_Time__c = timeString;
+                }
                 component.set('v.visitRec', result);
+                component.set("v.newLeadRec.Specifier__c", component.get("v.visitRec.Specifier__r.Name"));
                 
                 var street = '';
                 var city = '';
@@ -508,5 +529,68 @@
             return true;
         }
     },
+
+    getVisitStatusPickValues : function(component,event,helper){
+        debugger;
+        var action = component.get("c.getPickListValuesMethod");
+        action.setParams({ "ObjectApi_name" : 'Visit__c', "Field_Name" : 'Visit_Status__c'});
+        action.setCallback(this, function(response){
+            if(response.getState() === "SUCCESS"){
+                var data = response.getReturnValue();
+                component.set("v.VisitStautspickValues", data);
+            }
+        });
+        $A.enqueueAction(action);
+    },
+    getLeadBDCategoryPickValues : function(component,event,helper){
+        debugger;
+        var action = component.get("c.getPickListValuesMethod");
+        action.setParams({"ObjectApi_name" : 'Lead', "Field_Name" : 'BD_Catogory__c' });
+        action.setCallback(this, function(response){
+            if(response.getState() === "SUCCESS"){
+                var data = response.getReturnValue();
+                component.set("v.LeadBDCategorypickValues", data);
+            }
+        });
+        $A.enqueueAction(action);
+    },
+    getLeadCityLocationPickValues : function(component,event,helper){
+        debugger;
+        var action = component.get("c.getPickListValuesMethod");
+        action.setParams({ "ObjectApi_name" : 'Lead', "Field_Name" : 'Client_Location_City__c'  });
+        action.setCallback(this, function(response){
+            if(response.getState() === "SUCCESS"){
+                var data = response.getReturnValue();
+                component.set("v.LeadCityLocationpickValues", data);
+            }
+        });
+        $A.enqueueAction(action);
+    },
+    getLeadStatusPickValues : function(component,event,helper){
+        debugger;
+        var action = component.get("c.getPickListValuesMethod");
+        action.setParams({ "ObjectApi_name" : 'Lead', "Field_Name" : 'Status'});
+        action.setCallback(this, function(response){
+            if(response.getState() === "SUCCESS"){
+                var data = response.getReturnValue();
+                component.set("v.LeadStatuspickValues", data);
+            }
+        });
+        $A.enqueueAction(action);
+    },
+
+    getLeadTypePickValues : function(component,event,helper){
+        debugger;
+        var action = component.get("c.getPickListValuesMethod");
+        action.setParams({"ObjectApi_name" : 'Lead', "Field_Name" : 'Lead_Type__c'});
+        action.setCallback(this, function(response){
+            if(response.getState() === "SUCCESS"){
+                var data = response.getReturnValue();
+                component.set("v.LeadTypepickValues", data);
+            }
+        });
+        $A.enqueueAction(action);
+    },
+     
     
 });

@@ -25,8 +25,11 @@
     <aura:attribute name="oppRec" type="sObject" default="{sObjectType: 'Opportunity'}" />
     <aura:attribute name="caseRec" type="sObject" default="{sObjectType: 'Case'}" />
     <aura:attribute name="visitRec" type="sObject" default="{sObjectType: 'Visit__c'}" />
+    <aura:attribute name="newLeadRec" type="sObject" default="{sObjectType: 'Lead'}" />
+    <aura:attribute name="newChildVisitRec" type="sObject" default="{sObjectType: 'Visit__c'}" />
     <aura:attribute name="accID" type="String" />
     <aura:attribute name="visitId" type="String" />
+    <aura:attribute name="ParentVisitName" type="String" />
     <aura:attribute name="ShowCheckInButton" type="Boolean" default = "false"/>
     <aura:attribute name="ShowCheckOutButton" type="Boolean" default = "true"/>
     <aura:attribute name="pastVisitList" type="List" />
@@ -54,8 +57,9 @@
     <aura:attribute name="stackEmail" type="String"/>
     <aura:attribute name="auraUserId" type="String" />
      <aura:attribute name="showGenerateLeadPage" type="boolean" default="false"/>
-     <aura:attribute name="isFieldVisible" type="boolean" default="false"/>
-    
+     <aura:attribute name="showNextVisitPage" type="boolean" default="false"/>
+     <aura:attribute name="defaultAssignedUserForNextVisit" type="boolean" default="false"/>
+     <aura:attribute name="defaultLogInUserId" type="String" />
     <!-- Added by Anjali -->
     <aura:attribute name="showAddressPage" type="boolean" default="true" />
     
@@ -84,6 +88,13 @@
     <aura:attribute name="accBillAdrs" type="Boolean" />
     <aura:attribute name="customBillAdrsId" type="String" />
     <aura:registerEvent name="fieldVisitComponentEvent" type="c:fieldVisitComponentEvent"/>
+
+    <!-- Added New Variable for Making Standard funcationality into Custom - Dinesh -->
+    <aura:attribute name="VisitStautspickValues" type="List"/>
+    <aura:attribute name="LeadBDCategorypickValues" type="List"/>
+    <aura:attribute name="LeadCityLocationpickValues" type="List"/>
+    <aura:attribute name="LeadStatuspickValues" type="List"/>
+    <aura:attribute name="LeadTypepickValues" type="List"/>
     
     <aura:html tag="style">
         .slds-modal__container { 
@@ -130,37 +141,90 @@
     <!-- FinalVisitUpdateStatusPopUp-->
     <aura:if isTrue="{!v.showPopupVisitUpdateStatus}">
      <div class="slds-m-around_large">
-    <lightning:button variant="brand" label="What is Modal/PopUp Box?" onclick="{!c.openModel}" />
-    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+     <lightning:button variant="brand" label="What is Modal/PopUp Box?" onclick="{!c.openModel}" />
+      <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
         <div class="slds-modal__container">
             <header class="slds-modal__header">
                 <lightning:buttonIcon iconName="utility:close" onclick="{!c.closeModel}" alternativeText="close" variant="bare-inverse" class="slds-modal__close"/>
                 <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate"><b>Update Final Visit Status</b></h2>
             </header>
-            
             <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">   
                 <div class="slds-grid">
                     <div class="slds-col slds-size_1-of-2 slds-text-align_center">
                         <lightning:button label="𝐋𝐞𝐚𝐝 𝐆𝐞𝐧𝐞𝐫𝐚𝐭𝐞𝐝" onclick="{!c.OpenLeadGenerateModel}" class="slds-button slds-button_brand"/>
                     </div>
                     <div class="slds-col slds-size_1-of-2 slds-text-align_center slds-p-left_small">
-                        <lightning:button label="𝐒𝐜𝐡𝐞𝐝𝐮𝐥𝐞 𝐍𝐞𝐱𝐭 𝐕𝐢𝐬𝐢𝐭" onclick="{!c.submitDetails}" class="slds-button slds-button_brand"/>
+                        <lightning:button label="𝐒𝐜𝐡𝐞𝐝𝐮𝐥𝐞 𝐍𝐞𝐱𝐭 𝐕𝐢𝐬𝐢𝐭" onclick="{!c.OpenNextVisitModal}" class="slds-button slds-button_brand"/>
                     </div>
                 </div>
             </div>
-            
             <footer class="slds-modal__footer ">
                 <lightning:button class="slds-align_absolute-center" variant="destructive" label="Cancel" onclick="{!c.closeModel}" />
             </footer>
         </div>
-    </section>
-    <div class="slds-backdrop slds-backdrop_open"></div>
-</div>
-
+      </section>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+      </div>
     </aura:if>
-    
+
+     <!--NextVisitPage-->
+     <aura:if isTrue="{!v.showNextVisitPage}">
+        <div>
+            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <div class="slds-modal__header">
+                        <lightning:buttonIcon iconName="utility:close" onclick="{!c.closeModelGenerateLead}" alternativeText="close" variant="bare-inverse" class="slds-modal__close"/>
+                    </div>
+                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                        <div class="slds-border_bottom slds-align_absolute-center">
+                            <h1 style="font-size:20px;">Schedule Next Visit</h1>
+                        </div><br/>                            
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_1-of-2">
+                                     <lightning:input aura:id="plannedVisitDate" type="date" label="Planned Visit Date" value="{!v.newChildVisitRec.Planned_visit_date__c}" />
+                                </div>
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning:input aura:id="visitdescription" label="Description" value="{!v.newChildVisitRec.Description__c}" />
+                                </div>
+                            </div>
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning:input aura:id="expectedStartTime" type="time" label="Start Time" value="{!v.newChildVisitRec.Expected_Start_Time__c}" />
+                                </div>
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning:input aura:id="expectedEndTime" type="time" label="End Time" value="{!v.newChildVisitRec.Expected_End_Time__c}" />
+                                </div>
+                            </div>
+                            <aura:if isTrue="{!v.defaultAssignedUserForNextVisit}">
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning:inputField fieldName="Assigned_User__c" value="{!v.defaultLogInUserId}" disabled="true"  /> 
+                               </div>
+                             </aura:if>                            
+                             <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_1-of-2">
+                                     <lightning:input aura:id="visitdescription" label="Parent Visit" value="{!v.ParentVisitName}" disabled="true" />
+                                </div>
+                                 <div class="slds-col slds-size_1-of-2">
+                                     <lightning:input aura:id="visitspecifier" label="Specifier Name" value="{!v.visitRec.Specifier__r.Name}"  disabled="true" />
+                                 </div>
+                            </div>
+                          <br/>
+                            <div class="slds-align_absolute-center slds-border_top" slot="footer">
+                                <span style="margin-right: 40px;">
+                                    <lightning:button label="Back"  variant="destructive" onclick="{!c.GoBackToFinalVisitStausScreen}" class="slds-m-top_small slds-m-right_small" />
+                                </span>
+                                <lightning:button label="Save" variant="brand" onclick="{!c.createChildVisit}" class="slds-m-top_small slds-m-left_small" />
+                            </div>
+ 
+                        <!-- </lightning:recordEditForm>  -->
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </div>
+    </aura:if>
        
-        <!--LeadGeneratePage-->
+    <!--New Lead Page-->
     <aura:if isTrue="{!v.showGenerateLeadPage}">
         <div>
             <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open">
@@ -171,80 +235,98 @@
                     <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
                         <div class="slds-border_bottom slds-align_absolute-center">
                             <h1 style="font-size:20px;">New Lead</h1>
-                        </div><br/>
-                        <lightning:recordEditForm aura:id="recordCaseEditForm"  objectApiName="Lead"  onerror="{!c.handleError}" onsuccess="{!c.genereateLeadRecord}" >   
+                        </div><br/>                            
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_1-of-2">
+                                     <lightning:input name="leadname" required="true" value="{!v.newLeadRec.LastName}" placeholder="Enter Name" label="Name"  />
+                                </div>
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning:input name="leadcompany" required="true" value="{!v.newLeadRec.Company}" placeholder="Enter Firm Name" label="Firm Name" />
+                                </div>
+                            </div>
+                             <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning:select aura:id="leadbdcategorystatus" label="Select Catogory"  onchange="{!c.onChangeBdCategoryHandler}">
+                                        <option value="">--None--</option>
+                                        <aura:iteration items="{!v.LeadBDCategorypickValues}" var="val">
+                                            <option value="{!val}"> {!val}</option>
+                                        </aura:iteration>
+                                    </lightning:select>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning:select aura:id="leadcitylocation" label="Select City"  onchange="{!c.onChangeLeadCityLocationHandler}">
+                                        <option value="">--None--</option>
+                                        <aura:iteration items="{!v.LeadCityLocationpickValues}" var="val">
+                                            <option value="{!val}"> {!val}</option>
+                                        </aura:iteration>
+                                    </lightning:select>
+                                </div>
+                            </div>
                             
-                            <div class="slds-grid slds-gutters">
+                             <div class="slds-grid slds-gutters">
                                 <div class="slds-col slds-size_1-of-2">
-                                     <lightning:inputField fieldName="LastName" /> 
+                                    <lightning:input name="leadresponsible" value="{!v.newLeadRec.Responsible__c}" placeholder="Enter Text" label="Responsible"  />
                                 </div>
                                 <div class="slds-col slds-size_1-of-2">
-                                    <lightning:inputField fieldName="Company" /> 
+                                    <lightning:select aura:id="leadstatus" label="Select Status"  onchange="{!c.onChangeLeadStatusHandler}">
+                                        <option value="">--None--</option>
+                                        <aura:iteration items="{!v.LeadStatuspickValues}" var="val">
+                                            <option value="{!val}"> {!val}</option>
+                                        </aura:iteration>
+                                    </lightning:select>
+                                </div>
+                            </div>
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_1-of-2">
+                                   <lightning:input aura:id="estimateddateofquote" type="date" label="Estimated Date of Quote" value="{!v.newLeadRec.Estimated_Date_of_Quote__c}" />
+                                </div>
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning:input type="number" label="Approx Value" value="{!v.newLeadRec.Approx_Value__c}" onchange="{!c.handleApproxValueChange}" step="0.01" formatter="currency"/>
                                 </div>
                             </div>
                              <div class="slds-grid slds-gutters">
                                 <div class="slds-col slds-size_1-of-2">
-                                    <lightning:inputField fieldName="BD_Catogory__c" /> 
-                                </div>
-                                <div class="slds-col slds-size_1-of-2">
-                                    <lightning:inputField fieldName="Client_Location_City__c" /> 
-                                </div>
-                            </div>
-                            <div class="slds-grid slds-gutters">
-                                <div class="slds-col slds-size_1-of-2">
-                                  <lightning:inputField fieldName="Lead_Type__c" /> 
-                                </div>
-                                <div class="slds-col slds-size_1-of-2">
-                                    <lightning:inputField fieldName="Lead_Details__c" /> 
-                                </div>
-                            </div>
-                            <div class="slds-grid slds-gutters">
-                                <div class="slds-col slds-size_1-of-2">
-                                    <lightning:inputField fieldName="Follow_Up_Date_Time__c" /> 
-                                </div>
-                                <div class="slds-col slds-size_1-of-2">
-                                     <lightning:inputField fieldName="Action__c" /> 
-                                </div>
-                            </div>
-                             <div class="slds-grid slds-gutters">
-                                <div class="slds-col slds-size_1-of-2">
-                                    <lightning:inputField fieldName="Responsible__c" /> 
-                                </div>
-                                <div class="slds-col slds-size_1-of-2">
-                                    <lightning:inputField fieldName="Status" /> 
-                                </div>
-                            </div>
-                            <div class="slds-grid slds-gutters">
-                                <div class="slds-col slds-size_1-of-2">
-                                   <lightning:inputField fieldName="Estimated_Date_of_Quote__c" /> 
-                                </div>
-                                <div class="slds-col slds-size_1-of-2">
-                                    <lightning:inputField fieldName="Approx_Value__c" /> 
-                                </div>
-                            </div>
-                             <div class="slds-grid slds-gutters">
-                                <div class="slds-col slds-size_1-of-2">
-                                     <lightning:inputField fieldName="Description" /> 
+                                     <lightning:input name="leaddescription"  value="{!v.newLeadRec.Description}" placeholder="Enter Description" label="Description" />
                                 </div>
                                  <div class="slds-col slds-size_1-of-2">
-                                     <lightning:inputField fieldName="Specifier__c" value="{!v.sepcifierId}" />
+                                     <lightning:input type="text" name="leadspecifier" disabled ="true" value="{!v.newLeadRec.Specifier__c}"  label="Specifier Name" />
                                  </div>
                             </div>
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_1-of-2">
+                                  <lightning:select aura:id="leadtype" label="Select Type"  onchange="{!c.onChangeLeadTypeHandler}">
+                                    <option value="">--None--</option>
+                                    <aura:iteration items="{!v.LeadTypepickValues}" var="val">
+                                        <option value="{!val}"> {!val}</option>
+                                    </aura:iteration>
+                                </lightning:select>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning:input aura:id="followupdatetime" type="datetime" label="Follow Up DateTime" value="{!v.newLeadRec.Follow_Up_Date_Time__c}" />
+                                </div>
+                            </div>
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning:input name="leaddetails"  value="{!v.newLeadRec.Lead_Details__c}" placeholder="Enter Lead Details" label="Lead Details" />
+                                </div>
+                                <div class="slds-col slds-size_1-of-2">
+                                     <lightning:input name="leadaction"  value="{!v.newLeadRec.Action__c}" placeholder="Enter Action" label="Action" />
+                                </div>
+                            </div>
+                            <br/>
                             <div class="slds-align_absolute-center slds-border_top" slot="footer">
                                 <span style="margin-right: 40px;">
-                                    <lightning:button label="Cancel"  variant="destructive" onclick="{!c.closeModelGenerateLead}" class="slds-m-top_small slds-m-right_small" />
+                                    <lightning:button label="Back"  variant="destructive" onclick="{!c.GoBackToFinalVisitStausScreen}" class="slds-m-top_small slds-m-right_small" />
                                 </span>
-                                <lightning:button label="Submit" variant="success" onclick="{!c.genereateLeadRecord}" class="slds-m-top_small slds-m-left_small" />
+                                <lightning:button label="Save" variant="brand" onclick="{!c.createNewLeadRecord}" class="slds-m-top_small slds-m-left_small" />
                             </div>
  
-                        </lightning:recordEditForm> 
                     </div>
                 </div>
             </section>
             <div class="slds-backdrop slds-backdrop_open"></div>
         </div>
     </aura:if>
-    
     
     <lightning:Layout multipleRows="true">
         <!--div style="margin-top:1%"-->
@@ -279,6 +361,7 @@
                 
             </div>
             <div class="checkinButton" style="">
+                <lightning:button onclick="{!c.UpdateVisitDetails}" label="Update Visit" class="visitCheckInButtons"/>
                 <lightning:button onclick="{!c.checkInHandler}" label="Check-In" disabled="{!v.ShowCheckInButton}" class="visitCheckInButtons"/>&nbsp;
                 <lightning:button onclick="{!c.checkOutHandler}" label="Check-Out" disabled="{!v.ShowCheckOutButton}" class="visitCheckInButtons"/>
             </div>
@@ -494,10 +577,7 @@
                                             <div class="slds-border_bottom slds-align_absolute-center">
                                                 <h1 style="font-size:20px;">Create Opportunity</h1>
                                             </div><br/>
-                                            <lightning:recordEditForm aura:id="recordMOppEditForm" 
-                                                                      objectApiName="Opportunity"
-                                                                      onerror="{!c.handleError}"
-                                                                      onsuccess="{!c.handleOppSuccess}" >
+                                            <lightning:recordEditForm aura:id="recordMOppEditForm"  objectApiName="Opportunity"  onerror="{!c.handleError}" onsuccess="{!c.handleOppSuccess}" >
                                                 
                                                 <div class="slds-grid">
                                                     <div class="slds-col slds-size_2-of-2">
@@ -505,7 +585,6 @@
                                                         <lightning:inputField fieldName="Visit__c" value="{!v.visitRec.Id}"/>
                                                         <lightning:inputField fieldName="AccountId" value="{!v.visitRec.Account__c}"/>
                                                         <lightning:inputField fieldName="CloseDate"/>
-                                                        <!-- <lightning:inputField fieldName="RecordTypeId" aura:id="recType" disabled="true"/> -->
                                                         <lightning:inputField fieldName="StageName" value="New"/>
                                                         <lightning:inputField fieldName="End_Use_Category__c"/>
                                                         <lightning:inputField fieldName="End_Use_Application__c" />                
@@ -517,7 +596,6 @@
                                                         <lightning:inputField fieldName="Annual_Volume_in_units__c"/>
                                                         <lightning:inputField fieldName="Annual_Volume_Full__c" />                
                                                         <lightning:inputField fieldName="Target_Price_Kg__c" />
-                                                        <!-- <lightning:inputField fieldName="Actual_Annual_Potential_Value__c" />  -->
                                                         <lightning:inputField fieldName="Primary_Contact__c" value="{!v.visitRec.Account__r.Customer_Contact__c}"/>
                                                         <lightning:inputField fieldName="Customer_Followup_Date__c"/>
                                                         <lightning:inputField fieldName="Customer_response__c"/>
@@ -575,7 +653,7 @@
                     </ul>
                 </div>
                 
-                
+<!--                 
                 <div class="secondbutton">
                     <ul class="slds-button-group-row">
                         
@@ -586,7 +664,7 @@
                             <lightning:button onclick="{!c.createTaskForMOM}" label="Log MOM" class="visitMainButtonsSecond"/>
                         </li>
                     </ul>
-                </div>
+                </div> -->
                 <div class="secondbutton">
                     <ul class="slds-button-group-row">
                         
@@ -1557,18 +1635,13 @@
                 <section role="dialog" tabindex="-1" aria-label="Meaningful description of the modal content" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
                     <div class="slds-modal__container" >
                         <header class="slds-modal__header">
-                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.closeLeadModelPop}">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.onCancelVisitUpdatePage}">
                                 <lightning:icon iconName="utility:close" size="small" variant="neutral"/>
                                 <span class="slds-assistive-text">Close</span>
                             </button>
                         </header>
                         <center style="background: rgb(224, 166, 124);font-size: 20px;padding: 5px;"><b>Update Visit Details</b></center>
                         <div class="slds-modal__content slds-p-around_medium alignLeft" id="modal-content-id-1">  
-                            <lightning:recordEditForm aura:id="recordLeadEditForm" 
-                                                      recordId="{!v.visitId}" 
-                                                      objectApiName="Visit__c"
-                                                      onerror="{!c.handleError}"
-                                                      onsuccess="{!c.handleUpdateVisit}" >
                                 <div class="slds-section slds-is-open">
                                     <h3 class="slds-section__title"> 
                                         <span class="slds-truncate slds-size_12-of-12" title="Section Title" style="Background-color:#F3F3F3;border-radius:0.25rem;padding:3px;"><b>Basic Details</b></span>
@@ -1576,34 +1649,42 @@
                                 </div>
                                 <div class="slds-grid slds-gutters">
                                     <div class="slds-col slds-size_1-of-2">
-                                        <lightning:inputField fieldName="Name" aura:id="visitName"/> 
+                                        <lightning:input aura:id="visitname" value="{!v.visitRec.Name}" label="Name"  disabled="true"  />
                                     </div>
                                     <div class="slds-col slds-size_1-of-2">
-                                        <lightning:inputField fieldName="Visit_Status__c" aura:id="visitStatus"/> 
-                                    </div>
-                                </div>
-                                <div class="slds-grid slds-gutters">
-                                    <div class="slds-col slds-size_1-of-2">
-                                        <lightning:inputField fieldName="Planned_visit_date__c" aura:id="plannedVisitDate"/> 
-                                    </div>
-                                    <div class="slds-col slds-size_1-of-2">
-                                        <lightning:inputField fieldName="Actual_visit_date__c" aura:id="actualVisitDate"/> 
+                                        <lightning:select aura:id="visitStatus" label="Select Status"  onchange="{!c.onChangeVisitStatusHandler}">
+                                            <option value="{!v.visitRec.Visit_Status__c}">{!v.visitRec.Visit_Status__c}</option>
+                                            <aura:iteration items="{!v.VisitStautspickValues}" var="val">
+                                                <option value="{!val}"> {!val}</option>
+                                            </aura:iteration>
+                                        </lightning:select>
                                     </div>
                                 </div>
+                                
                                 <div class="slds-grid slds-gutters">
                                     <div class="slds-col slds-size_1-of-2">
-                                        <lightning:inputField fieldName="Expected_Start_Time__c" aura:id="plannedVisitDate"/> 
+                                        <lightning:input aura:id="plannedVisitDate" type="date" label="Planned Visit Date" value="{!v.visitRec.Planned_visit_date__c}" />
                                     </div>
                                     <div class="slds-col slds-size_1-of-2">
-                                        <lightning:inputField fieldName="Expected_End_Time__c" aura:id="actualVisitDate"/> 
+                                        <lightning:input aura:id="actualVisitDate" type="date" label="Actual Visit Date" value="{!v.visitRec.Actual_visit_date__c}" />
                                     </div>
                                 </div>
+
                                 <div class="slds-grid slds-gutters">
                                     <div class="slds-col slds-size_1-of-2">
-                                        <lightning:inputField fieldName="Specifier__c" aura:id="plannedVisitDate"/> 
+                                        <lightning:input aura:id="expectedStartTime" type="time" label="Start Time" value="{!v.visitRec.Expected_Start_Time__c}" />
                                     </div>
                                     <div class="slds-col slds-size_1-of-2">
-                                        <lightning:inputField fieldName="Description__c" aura:id="actualVisitDate"/> 
+                                        <lightning:input aura:id="expectedEndTime" type="time" label="End Time" value="{!v.visitRec.Expected_End_Time__c}" />
+                                    </div>
+                                </div>
+                                
+                                <div class="slds-grid slds-gutters">
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning:input aura:id="specifierId" label="Specifier Name" value="{!v.visitRec.Specifier__r.Name}" disabled="true"   />
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning:input aura:id="visitdescription" label="Description" value="{!v.visitRec.Description__c}" />
                                     </div>
                                 </div>
                                 <div class="slds-section slds-is-open">
@@ -1613,25 +1694,25 @@
                                 </div>
                                 <div class="slds-grid slds-gutters">
                                     <div class="slds-col slds-size_1-of-2">
-                                        <lightning:inputField fieldName="Street__c" aura:id="visitName"/> 
+                                        <lightning:input aura:id="visitstreet" label="Street" value="{!v.visitRec.Street__c}" />
                                     </div>
                                     <div class="slds-col slds-size_1-of-2">
-                                        <lightning:inputField fieldName="Postal_Code__c" aura:id="visitStatus"/> 
+                                        <lightning:input aura:id="visitpostalCode" label="Postal Code" value="{!v.visitRec.Postal_Code__c}" />
                                     </div>
                                 </div>
                                 <div class="slds-grid slds-gutters">
                                     <div class="slds-col slds-size_1-of-2">
-                                        <lightning:inputField fieldName="City__c" aura:id="visitName"/> 
+                                        <lightning:input aura:id="visitcity" label="City" value="{!v.visitRec.City__c}" />
                                     </div>
                                     <div class="slds-col slds-size_1-of-2">
-                                        <lightning:inputField fieldName="State__c" aura:id="visitStatus"/> 
+                                        <lightning:input aura:id="visitstate" label="State" value="{!v.visitRec.State__c}" />
                                     </div>
                                 </div>
                                 <div class="slds-align_absolute-center slds-border_top" slot="footer">
                                     <lightning:button label="Cancel" variant="destructive" onclick="{!c.onCancelVisitUpdatePage}" class="slds-m-top_small slds-m-right_small" />
-                                    <lightning:button label="Save Visit Details" variant="success" type="submit" class="slds-m-top_small" />
+                                    <lightning:button label="Update Details" variant="brand" onclick="{!c.handleUpdateVisitSuccess}" class="slds-m-top_small" />
                                 </div> 
-                            </lightning:recordEditForm>
+                            
                         </div>
                     </div>
                 </section>

@@ -1,6 +1,10 @@
 ({
     doInit : function(component, event, helper) { 
         debugger;
+        let currentLogInUserId = $A.get("$SObjectType.CurrentUser.Id");
+        if(currentLogInUserId != undefined){
+            component.set("v.defaultLogInUserId",currentLogInUserId);
+        }
         var lat;
         var long;
         lat = component.get("v.currentLatitude");
@@ -11,7 +15,12 @@
         helper.getAccRelatedOppList(component, event, helper);       
         helper.getRelatedInvoiceList(component, event, helper);
         helper.getRelatedCaseList(component, event, helper);
-        helper.getRelatedActivityList(component, event, helper);        
+        helper.getRelatedActivityList(component, event, helper);      
+        helper.getVisitStatusPickValues(component, event, helper);
+        helper.getLeadBDCategoryPickValues(component, event, helper);
+        helper.getLeadCityLocationPickValues(component, event, helper);
+        helper.getLeadStatusPickValues(component, event, helper);
+        helper.getLeadTypePickValues(component, event, helper);
     },    
     
     closeModalPopup : function(component, event, helper){
@@ -352,7 +361,7 @@
     
     handleSubmit: function(component, event, helper) {
         debugger;
-        component.find('recordEditForm').submit();
+        component.set("v.spinner", true);
     }, 
     
     handleOppSubmit: function(component, event, helper) {
@@ -371,28 +380,29 @@
         }
     },     
     
+    // Not using 
     handleOppSuccess: function (component, event, helper) {
         debugger;
-        var opportunityId = event.getParams().response.id; //event.getParam("id");
-        console.log('OpportunityId', opportunityId);
-        var visitId = component.get("v.visitId");
-        var action = component.get("c.createVisitActivity");
-        action.setParams({
-            opportunityId: opportunityId,
-            visitId: visitId
-        });
-        action.setCallback(this, function (response) {
-            if (response.getState() === "SUCCESS") {
-                component.set("v.ShowModal", false);
-                helper.getAccRelatedOppList(component, event, helper);
-                helper.showSuccess(component, event, helper);
-            } 
-            else {
-                console.error("Error creating Visit_Activity__c record: " + response.getError()[0].message);
-                helper.showError(component, event, helper, response.getError()[0].message);                
-            }
-        });
-        $A.enqueueAction(action);
+        // var opportunityId = event.getParams().response.id; //event.getParam("id");
+        // console.log('OpportunityId', opportunityId);
+        // var visitId = component.get("v.visitId");
+        // var action = component.get("c.createVisitActivity");
+        // action.setParams({
+        //     opportunityId: opportunityId,
+        //     visitId: visitId
+        // });
+        // action.setCallback(this, function (response) {
+        //     if (response.getState() === "SUCCESS") {
+        //         component.set("v.ShowModal", false);
+        //         helper.getAccRelatedOppList(component, event, helper);
+        //         helper.showSuccess(component, event, helper);
+        //     } 
+        //     else {
+        //         console.error("Error creating Visit_Activity__c record: " + response.getError()[0].message);
+        //         helper.showError(component, event, helper, response.getError()[0].message);                
+        //     }
+        // });
+        // $A.enqueueAction(action);
     },
     
     handleError : function(component, event, helper) {
@@ -413,43 +423,13 @@
     
     checkInHandler : function(component, event, helper) {
         debugger;
-        var lat;
-        var long;
         component.set("v.showPopupModal",false);
-        var userLocation = navigator.geolocation;
-        if (userLocation) {
-            userLocation.getCurrentPosition(function (position) {
-                lat = position.coords.latitude;
-                long = position.coords.longitude;
-                if(lat !=undefined){
-                    component.set("v.currentLatitudeNew",lat);
-                }
-                if(long !=undefined){
-                    component.set("v.currentLongitudeNew",long);
-                }
-                if ((lat != null && lat != undefined && lat != '') && (long != null && long != undefined && long != '')) {
-                    component.set('v.spinner', true);
-                    helper.CheckInVisithelper(component,lat, long);
-                }
-            });
-        } 
+        helper.CheckInVisithelper(component,component.get("v.currentLatitude"), component.get("v.currentLongitude"));
     },
     
     checkOutHandler: function(component, event, helper) {
         debugger;
-        var lat;
-        var long;
-        var userLocation = navigator.geolocation;
-        if (userLocation) {
-            userLocation.getCurrentPosition(function (position) {
-                lat = position.coords.latitude;
-                long = position.coords.longitude;
-                if ((lat != null && lat != undefined && lat != '') && (long != null && long != undefined && long != '')) {
-                    component.set('v.spinner', true);
-                    helper.CheckOutVisithelper(component,lat, long);
-                }
-            });
-        }         
+        helper.CheckOutVisithelper(component,component.get("v.currentLatitude"), component.get("v.currentLongitude"));       
     },
     
     goBackOnePage : function(component, event, helper){
@@ -473,21 +453,209 @@
         component.set("v.ShowUpdateVisitPage", false);
     },
     
-    handleUpdateVisit : function(component, event, helper) {
+    // Updated Visit Details using Apex
+    handleUpdateVisitSuccess : function(component, event, helper) {
+        debugger;
+        component.set('v.spinner', true);
+        component.set('v.visitRec.Visit_Status__c', component.find("visitStatus").get("v.value"));
+        component.set('v.visitRec.Planned_visit_date__c', component.find("plannedVisitDate").get("v.value"));
+        component.set('v.visitRec.Actual_visit_date__c', component.find("actualVisitDate").get("v.value"));
+        component.set('v.visitRec.Expected_Start_Time__c', component.find("expectedStartTime").get("v.value").substring(0, 5));
+        component.set('v.visitRec.Expected_End_Time__c', component.find("expectedEndTime").get("v.value").substring(0, 5));
+        component.set('v.visitRec.Specifier__c', component.get('v.visitRec.Specifier__c'));
+        component.set('v.visitRec.Description__c', component.find("visitdescription").get("v.value"));
+        component.set('v.visitRec.Street__c', component.find("visitstreet").get("v.value"));
+        component.set('v.visitRec.Postal_Code__c', component.find("visitpostalCode").get("v.value"));
+        component.set('v.visitRec.City__c', component.find("visitcity").get("v.value"));
+        component.set('v.visitRec.State__c', component.find("visitstate").get("v.value"));
+        var updateVisitObj = component.get("v.visitRec");
+        var action = component.get("c.updateVisitDetails");
+        action.setParams({VisitStringToUpdatedata : JSON.stringify(updateVisitObj)});
+        action.setCallback(this,function(response){
+            if(response.getState() == 'SUCCESS'){
+                component.set('v.spinner', false);
+                var toastEvent = $A.get("e.force:showToast");
+                toastEvent.setParams({
+                    title : 'SUCCESS',
+                    message: 'Visit Details Updated Successfully !',
+                    duration:' 2000',
+                    key: 'info_alt',
+                    type: 'success',
+                    mode: 'pester'
+                });
+                toastEvent.fire();
+                component.set("v.ShowUpdateVisitPage",false);
+                component.set("v.showPopupVisitUpdateStatus",true);
+            }
+            else if(response.getState() == 'ERROR'){
+                var errors = action.getError();
+                if (errors) {
+                    if (errors[0] && errors[0].message) {
+                        var toastEvent = $A.get("e.force:showToast");
+                        toastEvent.setParams({
+                            title : 'ERROR',
+                            message:errors[0].message,
+                            duration:' 5000',
+                            key: 'info_alt',
+                            type: 'error',
+                            mode: 'pester'
+                        });
+                        toastEvent.fire();
+                        component.set("v.ShowUpdateVisitPage",false);
+                    }
+                }
+            }else if (response.getState() === "INCOMPLETE") {
+                alert('No response from server or client is offline.');
+            }
+
+        });
+        $A.enqueueAction(action);
+    },
+
+     // Insert Lead Record using Apex
+    createNewLeadRecord : function(compoenent, event,helper){
+        debugger;
+        compoenent.set('v.newLeadRec.Specifier__c', compoenent.get("v.visitRec.Specifier__c"));
+        var getnewLeadRecord = compoenent.get("v.newLeadRec");
+        var action = compoenent.get("c.specifierNewLeadRecord");
+        action.setParams({LeadRec : getnewLeadRecord});
+        action.setCallback(this,function(response){
+            if(response.getState() === 'SUCCESS'){
+                if(response.getReturnValue() != null){
+                    var toastEvent = $A.get("e.force:showToast");
+                    toastEvent.setParams({
+                        title : 'SUCCESS',
+                        message: 'Lead Generated Successfully !',
+                        duration:' 5000',
+                        key: 'info_alt',
+                        type: 'success',
+                        mode: 'pester'
+                    });
+                    toastEvent.fire();
+                    compoenent.set("v.showGenerateLeadPage",false);
+                }
+            }
+            if(response.getState() === 'ERROR'){
+                var errors = action.getError();
+                if (errors) {
+                    if (errors[0] && errors[0].message) {
+                        var toastEvent = $A.get("e.force:showToast");
+                        toastEvent.setParams({
+                            title : 'ERROR',
+                            message:errors[0].message,
+                            duration:' 5000',
+                            key: 'info_alt',
+                            type: 'error',
+                            mode: 'pester'
+                        });
+                        toastEvent.fire();
+                        compoenent.set("v.showGenerateLeadPage",false);
+                    }
+                }
+            }else if (response.getState() === "INCOMPLETE") {
+                alert('No response from server or client is offline.');
+            }
+
+        });
+        $A.enqueueAction(action);
+    },
+
+    // Insert child visit using Apex
+    createChildVisit : function(compoenent,event,helper){
+     debugger;
+     compoenent.set('v.newChildVisitRec.Specifier__c', compoenent.get("v.visitRec.Specifier__c"));
+     compoenent.set('v.newChildVisitRec.Assigned_User__c', compoenent.get("v.defaultLogInUserId"));
+     compoenent.set('v.newChildVisitRec.Visit__c', compoenent.get("v.visitRec.Id"));
+     compoenent.set('v.newChildVisitRec.Expected_Start_Time__c', compoenent.get("v.newChildVisitRec.Expected_Start_Time__c").substring(0, 5));
+     compoenent.set('v.newChildVisitRec.Expected_End_Time__c', compoenent.get("v.newChildVisitRec.Expected_End_Time__c").substring(0, 5));
+     var getChildVisitRec = compoenent.get("v.newChildVisitRec");
+     var action = compoenent.get("v.createChildVisitRecord");
+     action.setParams({childvisitRec : getChildVisitRec});
+     action.setCallback(this,function(response){
+     if(response.getState() === 'SUCCESS'){
+        if(response.getReturnValue() !=null){
+            var toastEvent = $A.get("e.force:showToast");
+            toastEvent.setParams({
+                title : 'SUCCESS',
+                message: 'Lead Generated Successfully !',
+                duration:' 5000',
+                key: 'info_alt',
+                type: 'success',
+                mode: 'pester'
+            });
+            toastEvent.fire();
+            compoenent.set("v.showNextVisitPage",false);
+        }
+     } 
+     if(response.getState() === 'ERROR'){
+        var errors = action.getError();
+        if (errors) {
+            if (errors[0] && errors[0].message) {
+                var toastEvent = $A.get("e.force:showToast");
+                toastEvent.setParams({
+                    title : 'ERROR',
+                    message:errors[0].message,
+                    duration:' 5000',
+                    key: 'info_alt',
+                    type: 'error',
+                    mode: 'pester'
+                });
+                toastEvent.fire();
+                compoenent.set("v.showGenerateLeadPage",false);
+            }
+        }
+    }else if (response.getState() === "INCOMPLETE") {
+        alert('No response from server or client is offline.');
+    }
+     });
+     $A.enqueueAction(action);
+    },
+
+    // New Lead Creation // Not used
+    genereateLeadRecord :  function(component, event, helper) {
         debugger;
         var params = event.getParams();
         var recordId = params.response.id;
         var fields = params.response.fields;
         if(params.response !=null && params.response != undefined){
-            component.set("v.ShowUpdateVisitPage",false);
-            component.set("v.showPopupVisitUpdateStatus",true);
+            var toastEvent = $A.get("e.force:showToast");
+            toastEvent.setParams({
+                title : 'SUCCESS',
+                message: 'Lead Created Successfully!',
+                duration:' 5000',
+                key: 'info_alt',
+                type: 'success',
+                mode: 'dismissible'
+            });
+            toastEvent.fire();
+            component.set("v.showGenerateLeadPage",false);
         }
+    },
+
+    // Not used
+    handleGenerateLeadError : function(component, event, helper) {
+        debugger;
+        var errorMsg = event.getParam("detail");
+        var toastEvent = $A.get("e.force:showToast");
+        toastEvent.setParams({
+            "title": "Error",
+            "message": errorMsg,
+            "type": "error"
+        });
+        toastEvent.fire();
     },
     
     OpenLeadGenerateModel: function (component, event, helper) {
         debugger;
         component.set("v.showPopupVisitUpdateStatus",false);
         component.set("v.showGenerateLeadPage",true);
+    },
+
+    GoBackToFinalVisitStausScreen : function (component, event, helper) {
+        debugger;
+        component.set("v.showPopupVisitUpdateStatus",true);
+        component.set("v.showGenerateLeadPage",false);
+        component.set("v.showNextVisitPage",false);
     },
     
     closeModel: function(component, event, helper) {
@@ -498,6 +666,92 @@
     closeModelGenerateLead : function(component, event, helper) {
         debugger;
         component.set("v.showGenerateLeadPage", false);
+        component.set("v.showNextVisitPage",false);
     },
+
+    handleError : function (component, event, helper) {
+       debugger;
+        component.set("v.showSpinner", false);
+        var toastEvent = $A.get("e.force:showToast");
+        toastEvent.setParams({
+            "title": "Error",
+            "message": "There was an error saving the record.",
+            "type": "error"
+        });
+        toastEvent.fire();
+    },
+
+    OpenNextVisitModal : function(component, event, helper) {
+     debugger;
+     component.set("v.showNextVisitPage",true);
+     component.set("v.showPopupVisitUpdateStatus",false);
+    },
+
+    // Not used
+    NewVisitRecordOnSuccess : function(component, event, helper) {
+        debugger;
+        var params = event.getParams();
+        var recordId = params.response.id;
+        var fields = params.response.fields;
+        if(params.response !=null && params.response != undefined){
+            var toastEvent = $A.get("e.force:showToast");
+            toastEvent.setParams({
+                title : 'SUCCESS',
+                message: 'Visit Created Successfully!',
+                duration:' 5000',
+                key: 'info_alt',
+                type: 'success',
+                mode: 'dismissible'
+            });
+            toastEvent.fire();
+            component.set("v.showNextVisitPage",false);
+        }
+    },
+
+    handleNewVisitError : function (component, event, helper) {
+        debugger;
+         component.set("v.showSpinner", false);
+         var toastEvent = $A.get("e.force:showToast");
+         toastEvent.setParams({
+             "title": "Error",
+             "message": "There was an error saving the record.",
+             "type": "error"
+         });
+         toastEvent.fire();
+     },
+
+     onChangeVisitStatusHandler : function(component,event,helper){
+        debugger;
+        var selectedStatus = event.getSource().get("v.value");
+        var updatedStatus = component.get('v.visitRec'); 
+        component.set('v.visitRec.Visit_Status__c', selectedStatus);
+        var updatedStatus1 = component.get('v.visitRec');
+    },
+    
+    onChangeBdCategoryHandler : function(component,event,helper){
+        debugger;
+        var selectedCategory = event.getSource().get("v.value");
+        component.set('v.newLeadRec.BD_Catogory__c', selectedCategory);
+    },
+    onChangeLeadCityLocationHandler : function(component,event,helper){
+        debugger;
+        var selectedCityLocation = event.getSource().get("v.value");
+        component.set('v.newLeadRec.Client_Location_City__c', selectedCityLocation);
+    },
+    onChangeLeadStatusHandler : function(component,event,helper){
+        debugger;
+        var selectedLeadStatus= event.getSource().get("v.value");
+        component.set('v.newLeadRec.Status', selectedLeadStatus);
+    },
+    handleApproxValueChange: function(component, event, helper) {
+       debugger;
+       var leadApproxValue = event.getSource().get("v.value");
+    },
+    onChangeLeadTypeHandler: function(component, event, helper) {
+        debugger;
+        var selectedleadType = event.getSource().get("v.value");
+        component.set('v.newLeadRec.Lead_Type__c', selectedleadType);
+     },
+
     
 })
